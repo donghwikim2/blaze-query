@@ -16,7 +16,8 @@ import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.S3ClientBuilder;
 import software.amazon.awssdk.services.s3.model.Bucket;
-import software.amazon.awssdk.services.s3.model.GetBucketLoggingRequest;
+import software.amazon.awssdk.services.s3.model.GetBucketEncryptionRequest;
+import software.amazon.awssdk.services.s3.model.ServerSideEncryptionRule;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -26,19 +27,20 @@ import java.util.List;
  * @author Donghwi Kim
  * @since 1.0.0
  */
-public class LoggingEnabledFetcher implements DataFetcher<AwsLoggingEnabled>, Serializable {
+public class ServerSideEncryptionRuleDataFetcher
+		implements DataFetcher<AwsServerSideEncryptionRule>, Serializable {
 
-	public static final LoggingEnabledFetcher INSTANCE = new LoggingEnabledFetcher();
+	public static final ServerSideEncryptionRuleDataFetcher INSTANCE = new ServerSideEncryptionRuleDataFetcher();
 
-	private LoggingEnabledFetcher() {
+	private ServerSideEncryptionRuleDataFetcher() {
 	}
 
 	@Override
-	public List<AwsLoggingEnabled> fetch(DataFetchContext context) {
+	public List<AwsServerSideEncryptionRule> fetch(DataFetchContext context) {
 		try {
 			List<AwsConnectorConfig.Account> accounts = AwsConnectorConfig.ACCOUNT.getAll( context );
 			SdkHttpClient sdkHttpClient = AwsConnectorConfig.HTTP_CLIENT.find( context );
-			List<AwsLoggingEnabled> list = new ArrayList<>();
+			List<AwsServerSideEncryptionRule> list = new ArrayList<>();
 			for ( AwsConnectorConfig.Account account : accounts ) {
 				for ( Region region : account.getRegions() ) {
 					S3ClientBuilder s3ClientBuilder = S3Client.builder()
@@ -49,16 +51,17 @@ public class LoggingEnabledFetcher implements DataFetcher<AwsLoggingEnabled>, Se
 					}
 					try (S3Client client = s3ClientBuilder.build()) {
 						for ( Bucket bucket : client.listBuckets().buckets() ) {
-							GetBucketLoggingRequest.builder().build();
-							var bucketLogging = client.getBucketLogging(
-									GetBucketLoggingRequest.builder().bucket( bucket.name() )
-											.build() );
-							list.add( new AwsLoggingEnabled(
-									account.getAccountId(),
-									region.id(),
-									bucket.name(),
-									bucketLogging.loggingEnabled()
-							) );
+							var serverSideEncryptionConfiguration = client.getBucketEncryption(
+									GetBucketEncryptionRequest.builder().bucket( bucket.name() )
+											.build() ).serverSideEncryptionConfiguration();
+							for ( ServerSideEncryptionRule rule : serverSideEncryptionConfiguration.rules() ) {
+								list.add( new AwsServerSideEncryptionRule(
+										account.getAccountId(),
+										region.id(),
+										bucket.name(),
+										rule
+								) );
+							}
 						}
 					}
 				}
@@ -66,12 +69,13 @@ public class LoggingEnabledFetcher implements DataFetcher<AwsLoggingEnabled>, Se
 			return list;
 		}
 		catch (Exception e) {
-			throw new DataFetcherException( "Could not fetch logging enabled list", e );
+			throw new DataFetcherException( "Could not fetch server side encryption rule list", e );
 		}
 	}
 
 	@Override
 	public DataFormat getDataFormat() {
-		return DataFormats.componentMethodConvention( AwsLoggingEnabled.class, AwsConventionContext.INSTANCE );
+		return DataFormats.componentMethodConvention( AwsServerSideEncryptionRule.class,
+				AwsConventionContext.INSTANCE );
 	}
 }

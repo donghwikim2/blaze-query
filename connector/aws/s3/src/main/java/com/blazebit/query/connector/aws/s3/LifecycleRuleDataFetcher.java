@@ -29,11 +29,11 @@ import java.util.Objects;
  * @author Donghwi Kim
  * @since 1.0.0
  */
-public class LifecycleRuleFetcher implements DataFetcher<AwsLifeCycleRule>, Serializable {
+public class LifecycleRuleDataFetcher implements DataFetcher<AwsLifeCycleRule>, Serializable {
 
-	public static final LifecycleRuleFetcher INSTANCE = new LifecycleRuleFetcher();
+	public static final LifecycleRuleDataFetcher INSTANCE = new LifecycleRuleDataFetcher();
 
-	private LifecycleRuleFetcher() {
+	private LifecycleRuleDataFetcher() {
 	}
 
 	@Override

@@ -16,7 +16,6 @@ import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.S3ClientBuilder;
 import software.amazon.awssdk.services.s3.model.Bucket;
-import software.amazon.awssdk.services.s3.model.GetBucketAclRequest;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -26,19 +25,19 @@ import java.util.List;
  * @author Donghwi Kim
  * @since 1.0.0
  */
-public class BucketAclFetcher implements DataFetcher<AwsBucketAcl>, Serializable {
+public class PublicAccessBlockConfigurationDataFetcher implements DataFetcher<AwsPublicAccessBlockConfiguration>, Serializable {
 
-	public static final BucketAclFetcher INSTANCE = new BucketAclFetcher();
+	public static final PublicAccessBlockConfigurationDataFetcher INSTANCE = new PublicAccessBlockConfigurationDataFetcher();
 
-	private BucketAclFetcher() {
+	private PublicAccessBlockConfigurationDataFetcher() {
 	}
 
 	@Override
-	public List<AwsBucketAcl> fetch(DataFetchContext context) {
+	public List<AwsPublicAccessBlockConfiguration> fetch(DataFetchContext context) {
 		try {
 			List<AwsConnectorConfig.Account> accounts = AwsConnectorConfig.ACCOUNT.getAll( context );
 			SdkHttpClient sdkHttpClient = AwsConnectorConfig.HTTP_CLIENT.find( context );
-			List<AwsBucketAcl> list = new ArrayList<>();
+			List<AwsPublicAccessBlockConfiguration> list = new ArrayList<>();
 			for ( AwsConnectorConfig.Account account : accounts ) {
 				for ( Region region : account.getRegions() ) {
 					S3ClientBuilder s3ClientBuilder = S3Client.builder()
@@ -49,14 +48,13 @@ public class BucketAclFetcher implements DataFetcher<AwsBucketAcl>, Serializable
 					}
 					try (S3Client client = s3ClientBuilder.build()) {
 						for ( Bucket bucket : client.listBuckets().buckets() ) {
-							var bucketAcl = client.getBucketAcl(
-									GetBucketAclRequest.builder().bucket( bucket.name() )
-											.build() );
-							list.add( new AwsBucketAcl(
+							var publicAccessBlockResponse = client.getPublicAccessBlock(r->r.bucket( bucket.name() ));
+							var publicAccessBlockConfiguration = publicAccessBlockResponse.publicAccessBlockConfiguration();
+							list.add( new AwsPublicAccessBlockConfiguration(
 									account.getAccountId(),
 									region.id(),
 									bucket.name(),
-									bucketAcl
+									publicAccessBlockConfiguration
 							) );
 						}
 					}
@@ -64,13 +62,13 @@ public class BucketAclFetcher implements DataFetcher<AwsBucketAcl>, Serializable
 			}
 			return list;
 		}
-		catch (Exception e) {
-			throw new DataFetcherException( "Could not fetch bucket acl list", e );
+		catch (RuntimeException e) {
+			throw new DataFetcherException( "Could not fetch public access block configuration list", e );
 		}
 	}
 
 	@Override
 	public DataFormat getDataFormat() {
-		return DataFormats.componentMethodConvention( AwsBucketAcl.class, AwsConventionContext.INSTANCE );
+		return DataFormats.componentMethodConvention( AwsPublicAccessBlockConfiguration.class, AwsConventionContext.INSTANCE );
 	}
 }

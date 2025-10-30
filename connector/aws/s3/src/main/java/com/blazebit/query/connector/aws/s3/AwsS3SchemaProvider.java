@@ -21,13 +21,14 @@ public final class AwsS3SchemaProvider implements QuerySchemaProvider {
 	public Set<? extends DataFetcher<?>> resolveSchemaObjects(ConfigurationProvider configurationProvider) {
 		return Set.of(
 				BucketDataFetcher.INSTANCE,
-				BucketAclFetcher.INSTANCE,
-				LifecycleRuleFetcher.INSTANCE,
-				LoggingEnabledFetcher.INSTANCE,
+				BucketAcDatalFetcher.INSTANCE,
+				BucketPolicyDataFetcher.INSTANCE,
+				LifecycleRuleDataFetcher.INSTANCE,
+				LoggingEnabledDataFetcher.INSTANCE,
 				ObjectLockConfigurationFetcher.INSTANCE,
-				PolicyStatusFetcher.INSTANCE,
-				PublicAccessBlockConfigurationFetcher.INSTANCE,
-				ServerSideEncryptionRuleFetcher.INSTANCE
+				PolicyStatusDataFetcher.INSTANCE,
+				PublicAccessBlockConfigurationDataFetcher.INSTANCE,
+				ServerSideEncryptionRuleDataFetcher.INSTANCE
 		);
 	}
 }

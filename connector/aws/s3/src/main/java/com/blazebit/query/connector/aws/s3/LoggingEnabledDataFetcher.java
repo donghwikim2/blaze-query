@@ -16,8 +16,7 @@ import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.S3ClientBuilder;
 import software.amazon.awssdk.services.s3.model.Bucket;
-import software.amazon.awssdk.services.s3.model.GetBucketPolicyStatusRequest;
-import software.amazon.awssdk.services.s3.model.S3Exception;
+import software.amazon.awssdk.services.s3.model.GetBucketLoggingRequest;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -27,19 +26,19 @@ import java.util.List;
  * @author Donghwi Kim
  * @since 1.0.0
  */
-public class PolicyStatusFetcher implements DataFetcher<AwsPolicyStatus>, Serializable {
+public class LoggingEnabledDataFetcher implements DataFetcher<AwsLoggingEnabled>, Serializable {
 
-	public static final PolicyStatusFetcher INSTANCE = new PolicyStatusFetcher();
+	public static final LoggingEnabledDataFetcher INSTANCE = new LoggingEnabledDataFetcher();
 
-	private PolicyStatusFetcher() {
+	private LoggingEnabledDataFetcher() {
 	}
 
 	@Override
-	public List<AwsPolicyStatus> fetch(DataFetchContext context) {
+	public List<AwsLoggingEnabled> fetch(DataFetchContext context) {
 		try {
 			List<AwsConnectorConfig.Account> accounts = AwsConnectorConfig.ACCOUNT.getAll( context );
 			SdkHttpClient sdkHttpClient = AwsConnectorConfig.HTTP_CLIENT.find( context );
-			List<AwsPolicyStatus> list = new ArrayList<>();
+			List<AwsLoggingEnabled> list = new ArrayList<>();
 			for ( AwsConnectorConfig.Account account : accounts ) {
 				for ( Region region : account.getRegions() ) {
 					S3ClientBuilder s3ClientBuilder = S3Client.builder()
@@ -50,25 +49,16 @@ public class PolicyStatusFetcher implements DataFetcher<AwsPolicyStatus>, Serial
 					}
 					try (S3Client client = s3ClientBuilder.build()) {
 						for ( Bucket bucket : client.listBuckets().buckets() ) {
-
-							try {
-								var policyStatus = client.getBucketPolicyStatus(
-										GetBucketPolicyStatusRequest.builder().bucket( bucket.name() )
-												.build() ).policyStatus();
-
-								list.add( new AwsPolicyStatus(
-										account.getAccountId(),
-										region.id(),
-										bucket.name(),
-										policyStatus
-								) );
-							}
-							catch (S3Exception e) {
-								if ( "NoSuchBucketPolicy".equals( e.awsErrorDetails().errorCode() ) ) {
-									continue;
-								}
-								throw e;
-							}
+							GetBucketLoggingRequest.builder().build();
+							var bucketLogging = client.getBucketLogging(
+									GetBucketLoggingRequest.builder().bucket( bucket.name() )
+											.build() );
+							list.add( new AwsLoggingEnabled(
+									account.getAccountId(),
+									region.id(),
+									bucket.name(),
+									bucketLogging.loggingEnabled()
+							) );
 						}
 					}
 				}
@@ -76,12 +66,12 @@ public class PolicyStatusFetcher implements DataFetcher<AwsPolicyStatus>, Serial
 			return list;
 		}
 		catch (Exception e) {
-			throw new DataFetcherException( "Could not fetch policy status list", e );
+			throw new DataFetcherException( "Could not fetch logging enabled list", e );
 		}
 	}
 
 	@Override
 	public DataFormat getDataFormat() {
-		return DataFormats.componentMethodConvention( AwsPolicyStatus.class, AwsConventionContext.INSTANCE );
+		return DataFormats.componentMethodConvention( AwsLoggingEnabled.class, AwsConventionContext.INSTANCE );
 	}
 }

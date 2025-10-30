@@ -16,8 +16,7 @@ import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.S3ClientBuilder;
 import software.amazon.awssdk.services.s3.model.Bucket;
-import software.amazon.awssdk.services.s3.model.GetBucketEncryptionRequest;
-import software.amazon.awssdk.services.s3.model.ServerSideEncryptionRule;
+import software.amazon.awssdk.services.s3.model.GetBucketAclRequest;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -27,20 +26,19 @@ import java.util.List;
  * @author Donghwi Kim
  * @since 1.0.0
  */
-public class ServerSideEncryptionRuleFetcher
-		implements DataFetcher<AwsServerSideEncryptionRule>, Serializable {
+public class BucketAcDatalFetcher implements DataFetcher<AwsBucketAcl>, Serializable {
 
-	public static final ServerSideEncryptionRuleFetcher INSTANCE = new ServerSideEncryptionRuleFetcher();
+	public static final BucketAcDatalFetcher INSTANCE = new BucketAcDatalFetcher();
 
-	private ServerSideEncryptionRuleFetcher() {
+	private BucketAcDatalFetcher() {
 	}
 
 	@Override
-	public List<AwsServerSideEncryptionRule> fetch(DataFetchContext context) {
+	public List<AwsBucketAcl> fetch(DataFetchContext context) {
 		try {
 			List<AwsConnectorConfig.Account> accounts = AwsConnectorConfig.ACCOUNT.getAll( context );
 			SdkHttpClient sdkHttpClient = AwsConnectorConfig.HTTP_CLIENT.find( context );
-			List<AwsServerSideEncryptionRule> list = new ArrayList<>();
+			List<AwsBucketAcl> list = new ArrayList<>();
 			for ( AwsConnectorConfig.Account account : accounts ) {
 				for ( Region region : account.getRegions() ) {
 					S3ClientBuilder s3ClientBuilder = S3Client.builder()
@@ -51,17 +49,15 @@ public class ServerSideEncryptionRuleFetcher
 					}
 					try (S3Client client = s3ClientBuilder.build()) {
 						for ( Bucket bucket : client.listBuckets().buckets() ) {
-							var serverSideEncryptionConfiguration = client.getBucketEncryption(
-									GetBucketEncryptionRequest.builder().bucket( bucket.name() )
-											.build() ).serverSideEncryptionConfiguration();
-							for ( ServerSideEncryptionRule rule : serverSideEncryptionConfiguration.rules() ) {
-								list.add( new AwsServerSideEncryptionRule(
-										account.getAccountId(),
-										region.id(),
-										bucket.name(),
-										rule
-								) );
-							}
+							var bucketAcl = client.getBucketAcl(
+									GetBucketAclRequest.builder().bucket( bucket.name() )
+											.build() );
+							list.add( new AwsBucketAcl(
+									account.getAccountId(),
+									region.id(),
+									bucket.name(),
+									bucketAcl
+							) );
 						}
 					}
 				}
@@ -69,13 +65,12 @@ public class ServerSideEncryptionRuleFetcher
 			return list;
 		}
 		catch (Exception e) {
-			throw new DataFetcherException( "Could not fetch server side encryption rule list", e );
+			throw new DataFetcherException( "Could not fetch bucket acl list", e );
 		}
 	}
 
 	@Override
 	public DataFormat getDataFormat() {
-		return DataFormats.componentMethodConvention( AwsServerSideEncryptionRule.class,
-				AwsConventionContext.INSTANCE );
+		return DataFormats.componentMethodConvention( AwsBucketAcl.class, AwsConventionContext.INSTANCE );
 	}
 }

@@ -16,6 +16,8 @@ import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.S3ClientBuilder;
 import software.amazon.awssdk.services.s3.model.Bucket;
+import software.amazon.awssdk.services.s3.model.GetBucketPolicyStatusRequest;
+import software.amazon.awssdk.services.s3.model.S3Exception;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -25,19 +27,19 @@ import java.util.List;
  * @author Donghwi Kim
  * @since 1.0.0
  */
-public class PublicAccessBlockConfigurationFetcher implements DataFetcher<AwsPublicAccessBlockConfiguration>, Serializable {
+public class PolicyStatusDataFetcher implements DataFetcher<AwsPolicyStatus>, Serializable {
 
-	public static final PublicAccessBlockConfigurationFetcher INSTANCE = new PublicAccessBlockConfigurationFetcher();
+	public static final PolicyStatusDataFetcher INSTANCE = new PolicyStatusDataFetcher();
 
-	private PublicAccessBlockConfigurationFetcher() {
+	private PolicyStatusDataFetcher() {
 	}
 
 	@Override
-	public List<AwsPublicAccessBlockConfiguration> fetch(DataFetchContext context) {
+	public List<AwsPolicyStatus> fetch(DataFetchContext context) {
 		try {
 			List<AwsConnectorConfig.Account> accounts = AwsConnectorConfig.ACCOUNT.getAll( context );
 			SdkHttpClient sdkHttpClient = AwsConnectorConfig.HTTP_CLIENT.find( context );
-			List<AwsPublicAccessBlockConfiguration> list = new ArrayList<>();
+			List<AwsPolicyStatus> list = new ArrayList<>();
 			for ( AwsConnectorConfig.Account account : accounts ) {
 				for ( Region region : account.getRegions() ) {
 					S3ClientBuilder s3ClientBuilder = S3Client.builder()
@@ -48,27 +50,38 @@ public class PublicAccessBlockConfigurationFetcher implements DataFetcher<AwsPub
 					}
 					try (S3Client client = s3ClientBuilder.build()) {
 						for ( Bucket bucket : client.listBuckets().buckets() ) {
-							var publicAccessBlockResponse = client.getPublicAccessBlock(r->r.bucket( bucket.name() ));
-							var publicAccessBlockConfiguration = publicAccessBlockResponse.publicAccessBlockConfiguration();
-							list.add( new AwsPublicAccessBlockConfiguration(
-									account.getAccountId(),
-									region.id(),
-									bucket.name(),
-									publicAccessBlockConfiguration
-							) );
+
+							try {
+								var policyStatus = client.getBucketPolicyStatus(
+										GetBucketPolicyStatusRequest.builder().bucket( bucket.name() )
+												.build() ).policyStatus();
+
+								list.add( new AwsPolicyStatus(
+										account.getAccountId(),
+										region.id(),
+										bucket.name(),
+										policyStatus
+								) );
+							}
+							catch (S3Exception e) {
+								if ( "NoSuchBucketPolicy".equals( e.awsErrorDetails().errorCode() ) ) {
+									continue;
+								}
+								throw e;
+							}
 						}
 					}
 				}
 			}
 			return list;
 		}
-		catch (RuntimeException e) {
-			throw new DataFetcherException( "Could not fetch public access block configuration list", e );
+		catch (Exception e) {
+			throw new DataFetcherException( "Could not fetch policy status list", e );
 		}
 	}
 
 	@Override
 	public DataFormat getDataFormat() {
-		return DataFormats.componentMethodConvention( AwsPublicAccessBlockConfiguration.class, AwsConventionContext.INSTANCE );
+		return DataFormats.componentMethodConvention( AwsPolicyStatus.class, AwsConventionContext.INSTANCE );
 	}
 }
