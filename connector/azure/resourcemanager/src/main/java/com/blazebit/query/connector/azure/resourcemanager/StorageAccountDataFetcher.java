@@ -34,15 +34,33 @@ public class StorageAccountDataFetcher implements DataFetcher<AzureResourceStora
 					context );
 			List<AzureResourceStorageAccount> list = new ArrayList<>();
 			for ( AzureResourceManager resourceManager : resourceManagers ) {
-				for ( StorageAccount storageAccount : resourceManager.storageAccounts().list() ) {
-					list.add( new AzureResourceStorageAccount(
-							resourceManager.tenantId(),
-							storageAccount.id(),
-							storageAccount.innerModel()
-					) );
+				try {
+					for ( StorageAccount storageAccount : resourceManager.storageAccounts().list() ) {
+						try {
+							list.add( new AzureResourceStorageAccount(
+									resourceManager.tenantId(),
+									storageAccount.id(),
+									storageAccount.innerModel()
+							) );
+						}
+						catch (RuntimeException e) {
+							throw new DataFetcherException(
+									String.format( "Could not process storage account '%s'", storageAccount.id() ),
+									e );
+						}
+					}
+				}
+				catch (RuntimeException e) {
+					throw new DataFetcherException(
+							String.format( "Could not list storage accounts for tenant '%s'", resourceManager.tenantId() ),
+							e );
 				}
 			}
 			return list;
+		}
+		catch (DataFetcherException e) {
+			// Re-throw DataFetcherException as-is to preserve detailed error messages
+			throw e;
 		}
 		catch (RuntimeException e) {
 			throw new DataFetcherException( "Could not fetch storage account list", e );

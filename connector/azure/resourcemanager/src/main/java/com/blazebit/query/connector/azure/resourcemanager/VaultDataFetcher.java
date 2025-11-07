@@ -38,18 +38,38 @@ public class VaultDataFetcher implements DataFetcher<AzureResourceVault>, Serial
 			for ( AzureResourceManager resourceManager : resourceManagers ) {
 				for ( AzureResourceManagerResourceGroup resourceGroup : resourceGroups ) {
 					if ( resourceManager.tenantId().equals( resourceGroup.getTenantId() ) ) {
-						for ( Vault vault : resourceManager.vaults()
-								.listByResourceGroup( resourceGroup.getResourceGroupName() ) ) {
-							list.add( new AzureResourceVault(
-									resourceManager.tenantId(),
-									vault.id(),
-									vault.innerModel()
-							) );
+						try {
+							for ( Vault vault : resourceManager.vaults()
+									.listByResourceGroup( resourceGroup.getResourceGroupName() ) ) {
+								try {
+									list.add( new AzureResourceVault(
+											resourceManager.tenantId(),
+											vault.id(),
+											vault.innerModel()
+									) );
+								}
+								catch (RuntimeException e) {
+									throw new DataFetcherException(
+											String.format( "Could not process vault '%s' in resource group '%s'",
+													vault.id(), resourceGroup.getResourceGroupName() ),
+											e );
+								}
+							}
+						}
+						catch (RuntimeException e) {
+							throw new DataFetcherException(
+									String.format( "Could not list vaults in resource group '%s' for tenant '%s'",
+											resourceGroup.getResourceGroupName(), resourceManager.tenantId() ),
+									e );
 						}
 					}
 				}
 			}
 			return list;
+		}
+		catch (DataFetcherException e) {
+			// Re-throw DataFetcherException as-is to preserve detailed error messages
+			throw e;
 		}
 		catch (RuntimeException e) {
 			throw new DataFetcherException( "Could not fetch vault list", e );
