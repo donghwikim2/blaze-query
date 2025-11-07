@@ -117,6 +117,8 @@ public class AzureResourceManagerDataFetcherTest {
 			session.put(
 					AzureResourceVault.class, List.of(AzureTestObjects.azureKeyVault()));
 
+			// This test demonstrates querying for key vaults with public network access enabled
+			// The query accesses vault.payload.properties.publicNetworkAccess to filter vaults
 			var typedQuery =
 					session.createQuery( "select vault.payload.id, vault.payload.properties from AzureKeyVault vault where vault.payload.properties.publicNetworkAccess = 'Enabled'", new TypeReference<Map<String, Object>>() {});
 
@@ -131,9 +133,11 @@ public class AzureResourceManagerDataFetcherTest {
 			session.put(
 					AzureResourceStorageAccount.class, List.of(AzureTestObjects.azureStorageAccount()));
 
-			// TODO: Query to detect storage accounts with public network access enabled
-			// The Azure SDK models flatten properties, so publicNetworkAccess should be accessible directly
-			// This test demonstrates the query that should check for public network access
+			// TODO: Complex query to check publicNetworkAccess field
+			// The Azure SDK StorageAccountInner model flattens properties, making it difficult to query nested fields
+			// Ideal query would be: "select sa.payload.id from AzureStorageAccount sa where sa.payload.publicNetworkAccess = 'Enabled'"
+			// However, the schema introspection needs to be enhanced to support accessing these flattened properties
+			// For now, this test verifies the storage account resource can be loaded and queried
 			var typedQuery =
 					session.createQuery( "select sa.payload.id from AzureStorageAccount sa", new TypeReference<Map<String, Object>>() {});
 
@@ -150,9 +154,12 @@ public class AzureResourceManagerDataFetcherTest {
 			session.put(
 					AzureResourceBlobServiceProperties.class, List.of(AzureTestObjects.azureBlobServicePropertiesWithoutProtection()));
 
-			// TODO: This test verifies storage accounts without proper immutability policy or legal hold protection
-			// The query should check for blob service properties that lack containerDeleteRetentionPolicy or deleteRetentionPolicy
-			// For now, we just verify the resource is loadable
+			// TODO: Complex query to check for missing retention policies
+			// This test verifies storage accounts without proper immutability policy or legal hold protection
+			// The ideal query would be: "select bsp.payload.id from AzureBlobServiceProperties bsp
+			//   where bsp.payload.containerDeleteRetentionPolicy is null or bsp.payload.deleteRetentionPolicy is null"
+			// However, the Azure SDK BlobServicePropertiesInner model structure needs proper schema mapping
+			// For now, this test verifies the blob service properties resource can be loaded and queried
 			var typedQuery =
 					session.createQuery( "select bsp.payload.id from AzureBlobServiceProperties bsp", new TypeReference<Map<String, Object>>() {});
 
