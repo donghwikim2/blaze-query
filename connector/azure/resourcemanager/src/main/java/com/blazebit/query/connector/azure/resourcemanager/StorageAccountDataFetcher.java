@@ -29,24 +29,43 @@ public class StorageAccountDataFetcher implements DataFetcher<AzureResourceStora
 
 	@Override
 	public List<AzureResourceStorageAccount> fetch(DataFetchContext context) {
+		List<AzureResourceManager> resourceManagers;
 		try {
-			List<AzureResourceManager> resourceManagers = AzureResourceManagerConnectorConfig.AZURE_RESOURCE_MANAGER.getAll(
-					context );
-			List<AzureResourceStorageAccount> list = new ArrayList<>();
-			for ( AzureResourceManager resourceManager : resourceManagers ) {
-				for ( StorageAccount storageAccount : resourceManager.storageAccounts().list() ) {
-					list.add( new AzureResourceStorageAccount(
-							resourceManager.tenantId(),
-							storageAccount.id(),
-							storageAccount.innerModel()
-					) );
-				}
-			}
-			return list;
+			resourceManagers = AzureResourceManagerConnectorConfig.AZURE_RESOURCE_MANAGER.getAll( context );
 		}
 		catch (RuntimeException e) {
-			throw new DataFetcherException( "Could not fetch storage account list", e );
+			throw new DataFetcherException( "Could not fetch Azure Resource Managers", e );
 		}
+
+		List<AzureResourceStorageAccount> list = new ArrayList<>();
+		for ( AzureResourceManager resourceManager : resourceManagers ) {
+			try {
+				for ( StorageAccount storageAccount : resourceManager.storageAccounts().list() ) {
+					try {
+						list.add( new AzureResourceStorageAccount(
+								resourceManager.tenantId(),
+								storageAccount.id(),
+								storageAccount.innerModel()
+						) );
+					}
+					catch (RuntimeException e) {
+						throw new DataFetcherException(
+								String.format( "Could not process storage account '%s'", storageAccount.id() ),
+								e );
+					}
+				}
+			}
+			catch (DataFetcherException e) {
+				// Re-throw DataFetcherException as-is to preserve detailed error messages
+				throw e;
+			}
+			catch (RuntimeException e) {
+				throw new DataFetcherException(
+						String.format( "Could not list storage accounts for tenant '%s'", resourceManager.tenantId() ),
+						e );
+			}
+		}
+		return list;
 	}
 
 	@Override

@@ -160,4 +160,56 @@ public class AzureTestObjects {
 			throw new RuntimeException(e);
 		}
 	}
+
+	public static AzureResourceVault azureKeyVault() {
+		try {
+			VaultInner vaultInner = VaultInner.fromJson(
+					jsonReader("src/test/resources/resource-definitions/azure/key-vault/key-vault.json"));
+			return new AzureResourceVault(
+					"123",
+					vaultInner.id(),
+					vaultInner);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	public static AzureResourceStorageAccount azureStorageAccount() {
+		try {
+			StorageAccountInner storageAccountInner = StorageAccountInner.fromJson(
+					jsonReader("src/test/resources/resource-definitions/azure/storage-account/storage-account.json"));
+			return new AzureResourceStorageAccount(
+					"123",
+					storageAccountInner.id(),
+					storageAccountInner);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	public static AzureResourceBlobServiceProperties azureBlobServiceProperties() {
+		try {
+			BlobServicePropertiesInner blobServicePropertiesInner = BlobServicePropertiesInner.fromJson(
+					jsonReader("src/test/resources/resource-definitions/azure/storage-account/blob-service-properties.json"));
+			return new AzureResourceBlobServiceProperties(
+					"123",
+					blobServicePropertiesInner.id(),
+					blobServicePropertiesInner);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	public static AzureResourceBlobServiceProperties azureBlobServicePropertiesWithoutProtection() {
+		try {
+			BlobServicePropertiesInner blobServicePropertiesInner = BlobServicePropertiesInner.fromJson(
+					jsonReader("src/test/resources/resource-definitions/azure/storage-account/blob-service-properties-without-protection.json"));
+			return new AzureResourceBlobServiceProperties(
+					"123",
+					blobServicePropertiesInner.id(),
+					blobServicePropertiesInner);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
 }
