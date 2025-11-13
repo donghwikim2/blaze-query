@@ -10,11 +10,11 @@ plugins {
 
 dependencies {
     api project(':blaze-query-connector-aws-base')
-    api libs.awssdk.iam
-    api libs.awssdk.sts
+    api libs.awssdk.accessanalyzer
     testImplementation project(':blaze-query-core-impl')
     testImplementation libs.junit.jupiter
     testImplementation libs.assertj.core
 }
 
-description = 'blaze-query-connector-aws-iam'
+description = 'blaze-query-connector-aws-accessanalyzer'
+
