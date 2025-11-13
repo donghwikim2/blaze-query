@@ -12,6 +12,8 @@ dependencies {
     api project(':blaze-query-connector-aws-base')
     api libs.awssdk.iam
     api libs.awssdk.sts
+    api libs.jackson.annotations
+    api libs.jackson.databind
     testImplementation project(':blaze-query-core-impl')
     testImplementation libs.junit.jupiter
     testImplementation libs.assertj.core

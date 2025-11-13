@@ -22,6 +22,7 @@ public final class AwsIAMSchemaProvider implements QuerySchemaProvider {
 		return Set.of(
 				UserDataFetcher.INSTANCE,
 				PolicyDataFetcher.INSTANCE,
+				PolicyDocumentDataFetcher.INSTANCE,
 				RoleDataFetcher.INSTANCE,
 				GroupDataFetcher.INSTANCE,
 				ServerCertificateDataFetcher.INSTANCE,
