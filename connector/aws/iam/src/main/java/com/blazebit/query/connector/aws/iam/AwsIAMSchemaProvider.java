@@ -21,7 +21,6 @@ public final class AwsIAMSchemaProvider implements QuerySchemaProvider {
 	public Set<? extends DataFetcher<?>> resolveSchemaObjects(ConfigurationProvider configurationProvider) {
 		return Set.of(
 				UserDataFetcher.INSTANCE,
-				PolicyDataFetcher.INSTANCE,
 				PolicyDocumentDataFetcher.INSTANCE,
 				RoleDataFetcher.INSTANCE,
 				GroupDataFetcher.INSTANCE,
