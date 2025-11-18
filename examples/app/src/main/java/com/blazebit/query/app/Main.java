@@ -37,6 +37,7 @@ import com.blazebit.query.connector.aws.iam.AwsIamAccountSummary;
 import com.blazebit.query.connector.aws.iam.AwsIamLoginProfile;
 import com.blazebit.query.connector.aws.iam.AwsIamMfaDevice;
 import com.blazebit.query.connector.aws.iam.AwsIamPasswordPolicy;
+import com.blazebit.query.connector.aws.iam.AwsIamPolicy;
 import com.blazebit.query.connector.aws.iam.AwsIamUser;
 import com.blazebit.query.connector.aws.kms.AwsKey;
 import com.blazebit.query.connector.aws.kms.AwsKeyAlias;
@@ -253,6 +254,7 @@ public class Main {
 			queryContextBuilder.registerSchemaObjectAlias( AwsIamAccountSummary.class, "AwsIamAccountSummary" );
 			queryContextBuilder.registerSchemaObjectAlias( AwsIamAccessKeyMetaDataLastUsed.class,
 					"AwsAccessKeyMetaDataLastUsed" );
+			queryContextBuilder.registerSchemaObjectAlias( AwsIamPolicy.class, "AwsIamPolicy" );
 
 			// EC2
 			queryContextBuilder.registerSchemaObjectAlias( AwsInstance.class, "AwsInstance" );
@@ -434,6 +436,12 @@ public class Main {
 		List<Object[]> awsAccountSummaryResult = awsAccountSummaryQuery.getResultList();
 		System.out.println( "AwsAccountSummary" );
 		print( awsAccountSummaryResult );
+
+		TypedQuery<Object[]> awsIamPolicyQuery = session.createQuery(
+				"select p.* from AwsIamPolicy p" );
+		List<Object[]> awsIamPolicyResult = awsIamPolicyQuery.getResultList();
+		System.out.println( "AwsIamPolicies" );
+		print( awsIamPolicyResult );
 
 		// EC2
 		TypedQuery<Object[]> awsInstanceQuery = session.createQuery(
