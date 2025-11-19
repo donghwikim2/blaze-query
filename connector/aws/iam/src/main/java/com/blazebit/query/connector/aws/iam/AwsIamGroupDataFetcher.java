@@ -14,7 +14,9 @@ import com.blazebit.query.spi.DataFormat;
 import software.amazon.awssdk.http.SdkHttpClient;
 import software.amazon.awssdk.services.iam.IamClient;
 import software.amazon.awssdk.services.iam.IamClientBuilder;
+import software.amazon.awssdk.services.iam.model.GetGroupResponse;
 import software.amazon.awssdk.services.iam.model.Group;
+import software.amazon.awssdk.services.iam.model.User;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -52,7 +54,16 @@ public class AwsIamGroupDataFetcher implements DataFetcher<AwsIamGroup>, Seriali
 				}
 				try (IamClient client = iamClientBuilder.build()) {
 					for ( Group group : client.listGroupsPaginator().groups() ) {
-						list.add( new AwsIamGroup( account.getAccountId(), group.groupId(), group ) );
+						List<User> users = new ArrayList<>();
+						client.getGroupPaginator(builder -> builder.groupName( group.groupName() ))
+								.users()
+								.forEach( users::add );
+						GetGroupResponse response = GetGroupResponse.builder()
+								.group( group )
+								.users( users )
+								.isTruncated( false )
+								.build();
+						list.add( new AwsIamGroup( account.getAccountId(), group.groupId(), response ) );
 					}
 				}
 			}
