@@ -8,8 +8,6 @@ import com.blazebit.query.connector.aws.base.AwsWrapper;
 import software.amazon.awssdk.services.iam.model.Role;
 
 /**
- * Representation of an AWS IAM role.
- *
  * @author Donghwi Kim
  * @since 1.0.0
  */

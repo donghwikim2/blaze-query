@@ -22,8 +22,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Data fetcher for managed policies attached directly to IAM groups.
- *
  * @author Donghwi Kim
  * @since 1.0.0
  */

@@ -8,8 +8,6 @@ import com.blazebit.query.connector.aws.base.AwsWrapper;
 import software.amazon.awssdk.services.iam.model.ServerCertificateMetadata;
 
 /**
- * Representation of an AWS IAM server certificate.
- *
  * @author Donghwi Kim
  * @since 1.0.0
  */

@@ -23,8 +23,6 @@ import java.util.List;
 import java.util.StringTokenizer;
 
 /**
- * Data fetcher for AWS Access Analyzer analyzers with tag support.
- *
  * @author Donghwi Kim
  * @since 1.0.0
  */

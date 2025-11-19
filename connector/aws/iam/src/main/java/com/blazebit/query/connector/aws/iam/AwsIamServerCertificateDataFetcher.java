@@ -21,8 +21,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Data fetcher for IAM server certificates.
- *
  * @author Donghwi Kim
  * @since 1.0.0
  */

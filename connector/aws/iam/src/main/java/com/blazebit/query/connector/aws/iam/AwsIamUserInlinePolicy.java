@@ -14,8 +14,6 @@ import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 /**
- * Represents an inline policy attached directly to an IAM user.
- *
  * @author Donghwi Kim
  * @since 1.0.0
  */

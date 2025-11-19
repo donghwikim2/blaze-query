@@ -10,8 +10,6 @@ import software.amazon.awssdk.services.accessanalyzer.model.AnalyzerSummary;
 import java.util.Map;
 
 /**
- * Represents an AWS Access Analyzer.
- *
  * @author Donghwi Kim
  * @since 1.0.0
  */

@@ -22,8 +22,6 @@ import java.util.List;
 import java.util.StringTokenizer;
 
 /**
- * Data fetcher that exposes AWS IAM roles.
- *
  * @author Donghwi Kim
  * @since 1.0.0
  */

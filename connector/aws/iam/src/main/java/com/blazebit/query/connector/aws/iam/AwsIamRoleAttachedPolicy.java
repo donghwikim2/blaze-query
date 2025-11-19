@@ -7,8 +7,6 @@ package com.blazebit.query.connector.aws.iam;
 import software.amazon.awssdk.services.iam.model.AttachedPolicy;
 
 /**
- * Represents a managed policy attached directly to an IAM role.
- *
  * @author Donghwi Kim
  * @since 1.0.0
  */

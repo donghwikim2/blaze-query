@@ -22,8 +22,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Data fetcher for IAM group memberships (which users belong to which groups).
- *
  * @author Donghwi Kim
  * @since 1.0.0
  */

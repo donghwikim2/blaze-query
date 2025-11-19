@@ -7,8 +7,6 @@ package com.blazebit.query.connector.aws.iam;
 import software.amazon.awssdk.services.iam.model.User;
 
 /**
- * Represents a user's membership in an IAM group.
- *
  * @author Donghwi Kim
  * @since 1.0.0
  */

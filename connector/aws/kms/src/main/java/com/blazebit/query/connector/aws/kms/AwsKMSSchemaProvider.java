@@ -11,8 +11,6 @@ import com.blazebit.query.spi.QuerySchemaProvider;
 import java.util.Set;
 
 /**
- * The schema provider for the AWS S3 connector.
- *
  * @author Donghwi Kim
  * @since 1.0.0
  */
