@@ -10,14 +10,14 @@ import software.amazon.awssdk.services.iam.model.User;
  * @author Donghwi Kim
  * @since 1.0.0
  */
-public record AwsIamGroupMembership(
+public record AwsIamGroupUser(
 		String accountId,
 		String groupName,
 		String userName,
 		String userArn
 ) {
-	public static AwsIamGroupMembership from(String accountId, String groupName, User user) {
-		return new AwsIamGroupMembership(
+	public static AwsIamGroupUser from(String accountId, String groupName, User user) {
+		return new AwsIamGroupUser(
 				accountId,
 				groupName,
 				user.userName(),

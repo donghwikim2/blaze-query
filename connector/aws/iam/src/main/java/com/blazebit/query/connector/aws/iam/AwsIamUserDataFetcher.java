@@ -47,7 +47,7 @@ public class AwsIamUserDataFetcher implements DataFetcher<AwsIamUser>, Serializa
 					iamClientBuilder.httpClient( sdkHttpClient );
 				}
 				try (IamClient client = iamClientBuilder.build()) {
-					for ( User user : client.listUsers().users() ) {
+					for ( User user : client.listUsersPaginator().users() ) {
 						StringTokenizer tokenizer = new StringTokenizer( user.arn(), ":" );
 						// arn
 						tokenizer.nextToken();

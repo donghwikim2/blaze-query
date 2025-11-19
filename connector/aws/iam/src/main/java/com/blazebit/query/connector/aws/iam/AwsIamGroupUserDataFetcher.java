@@ -25,19 +25,19 @@ import java.util.List;
  * @author Donghwi Kim
  * @since 1.0.0
  */
-public class AwsIamGroupMembershipDataFetcher implements DataFetcher<AwsIamGroupMembership>, Serializable {
+public class AwsIamGroupUserDataFetcher implements DataFetcher<AwsIamGroupUser>, Serializable {
 
-	public static final AwsIamGroupMembershipDataFetcher INSTANCE = new AwsIamGroupMembershipDataFetcher();
+	public static final AwsIamGroupUserDataFetcher INSTANCE = new AwsIamGroupUserDataFetcher();
 
-	private AwsIamGroupMembershipDataFetcher() {
+	private AwsIamGroupUserDataFetcher() {
 	}
 
 	@Override
-	public List<AwsIamGroupMembership> fetch(DataFetchContext context) {
+	public List<AwsIamGroupUser> fetch(DataFetchContext context) {
 		try {
 			List<AwsConnectorConfig.Account> accounts = AwsConnectorConfig.ACCOUNT.getAll( context );
 			SdkHttpClient sdkHttpClient = AwsConnectorConfig.HTTP_CLIENT.find( context );
-			List<AwsIamGroupMembership> list = new ArrayList<>();
+			List<AwsIamGroupUser> list = new ArrayList<>();
 			for ( AwsConnectorConfig.Account account : accounts ) {
 				IamClientBuilder iamClientBuilder = IamClient.builder()
 						// Any region is fine for IAM operations
@@ -53,7 +53,7 @@ public class AwsIamGroupMembershipDataFetcher implements DataFetcher<AwsIamGroup
 						for ( User user : client.getGroupPaginator(
 								builder -> builder.groupName( group.groupName() )
 						).users() ) {
-							list.add( AwsIamGroupMembership.from(
+						list.add( AwsIamGroupUser.from(
 									account.getAccountId(),
 									group.groupName(),
 									user
@@ -71,6 +71,6 @@ public class AwsIamGroupMembershipDataFetcher implements DataFetcher<AwsIamGroup
 
 	@Override
 	public DataFormat getDataFormat() {
-		return DataFormats.beansConvention( AwsIamGroupMembership.class, AwsConventionContext.INSTANCE );
+		return DataFormats.beansConvention( AwsIamGroupUser.class, AwsConventionContext.INSTANCE );
 	}
 }
