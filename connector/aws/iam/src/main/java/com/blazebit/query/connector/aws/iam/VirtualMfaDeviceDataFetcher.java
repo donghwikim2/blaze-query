@@ -14,32 +14,35 @@ import com.blazebit.query.spi.DataFormat;
 import software.amazon.awssdk.http.SdkHttpClient;
 import software.amazon.awssdk.services.iam.IamClient;
 import software.amazon.awssdk.services.iam.IamClientBuilder;
-import software.amazon.awssdk.services.iam.model.Role;
+import software.amazon.awssdk.services.iam.model.ListVirtualMfaDevicesRequest;
+import software.amazon.awssdk.services.iam.model.VirtualMFADevice;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.StringTokenizer;
 
 /**
- * Data fetcher that exposes AWS IAM roles.
- *
  * @author Donghwi Kim
  * @since 1.0.0
  */
-public class AwsIamRoleDataFetcher implements DataFetcher<AwsIamRole>, Serializable {
+public class VirtualMfaDeviceDataFetcher implements DataFetcher<AwsIamVirtualMfaDevice>, Serializable {
 
-	public static final AwsIamRoleDataFetcher INSTANCE = new AwsIamRoleDataFetcher();
+	public static final VirtualMfaDeviceDataFetcher INSTANCE = new VirtualMfaDeviceDataFetcher();
 
-	private AwsIamRoleDataFetcher() {
+	private VirtualMfaDeviceDataFetcher() {
 	}
 
 	@Override
-	public List<AwsIamRole> fetch(DataFetchContext context) {
+	public DataFormat getDataFormat() {
+		return DataFormats.beansConvention( AwsIamVirtualMfaDevice.class, AwsConventionContext.INSTANCE );
+	}
+
+	@Override
+	public List<AwsIamVirtualMfaDevice> fetch(DataFetchContext context) {
 		try {
 			List<AwsConnectorConfig.Account> accounts = AwsConnectorConfig.ACCOUNT.getAll( context );
 			SdkHttpClient sdkHttpClient = AwsConnectorConfig.HTTP_CLIENT.find( context );
-			List<AwsIamRole> list = new ArrayList<>();
+			List<AwsIamVirtualMfaDevice> list = new ArrayList<>();
 			for ( AwsConnectorConfig.Account account : accounts ) {
 				IamClientBuilder iamClientBuilder = IamClient.builder()
 						// Any region is fine for IAM operations
@@ -49,23 +52,13 @@ public class AwsIamRoleDataFetcher implements DataFetcher<AwsIamRole>, Serializa
 					iamClientBuilder.httpClient( sdkHttpClient );
 				}
 				try (IamClient client = iamClientBuilder.build()) {
-					for ( Role role : client.listRolesPaginator().roles() ) {
-						StringTokenizer tokenizer = new StringTokenizer( role.arn(), ":" );
-						// arn
-						tokenizer.nextToken();
-						// aws
-						tokenizer.nextToken();
-						// iam
-						tokenizer.nextToken();
-						// empty region
-						tokenizer.nextToken();
-						// resource id
-						String resourceId = tokenizer.nextToken();
-
-						list.add( new AwsIamRole(
+					ListVirtualMfaDevicesRequest request = ListVirtualMfaDevicesRequest.builder().build();
+					for ( VirtualMFADevice virtualMFADevice : client.listVirtualMFADevicesPaginator( request )
+							.virtualMFADevices() ) {
+						list.add( new AwsIamVirtualMfaDevice(
 								account.getAccountId(),
-								resourceId,
-								role
+								virtualMFADevice.serialNumber(),
+								virtualMFADevice
 						) );
 					}
 				}
@@ -73,25 +66,7 @@ public class AwsIamRoleDataFetcher implements DataFetcher<AwsIamRole>, Serializa
 			return list;
 		}
 		catch (RuntimeException e) {
-			throw new DataFetcherException( "Could not fetch role list", e );
+			throw new DataFetcherException( "Could not fetch virtual MFA devices list", e );
 		}
-	}
-
-	@Override
-	public DataFormat getDataFormat() {
-		return DataFormats.componentMethodConvention( AwsIamRole.class, AwsConventionContext.INSTANCE );
-	}
-
-	private static String resolveResourceId(String arn) {
-		int colonCount = 0;
-		for ( int i = 0; i < arn.length(); i++ ) {
-			if ( arn.charAt( i ) == ':' ) {
-				colonCount++;
-				if ( colonCount == 5 && i + 1 < arn.length() ) {
-					return arn.substring( i + 1 );
-				}
-			}
-		}
-		return arn;
 	}
 }
