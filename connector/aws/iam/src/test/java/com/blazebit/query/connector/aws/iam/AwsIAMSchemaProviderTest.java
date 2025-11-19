@@ -33,6 +33,7 @@ public class AwsIAMSchemaProviderTest {
 		builder.registerSchemaObjectAlias( AwsIamGroupAttachedPolicy.class, "AwsIAMGroupAttachedPolicy" );
 		builder.registerSchemaObjectAlias( AwsIamRoleAttachedPolicy.class, "AwsIAMRoleAttachedPolicy" );
 		builder.registerSchemaObjectAlias( AwsIamGroupMembership.class, "AwsIAMGroupMembership" );
+		builder.registerSchemaObjectAlias( AwsIamServerCertificate.class, "AwsIAMServerCertificate" );
 		CONTEXT = builder.build();
 	}
 
@@ -198,6 +199,20 @@ public class AwsIAMSchemaProviderTest {
 			var typedQuery =
 					session.createQuery(
 							"select m.* from AwsIAMGroupMembership m", new TypeReference<Map<String, Object>>() {
+							} );
+
+			assertThat( typedQuery.getResultList() ).isNotEmpty();
+		}
+	}
+
+	@Test
+	void should_return_server_certificate() {
+		try (var session = CONTEXT.createSession()) {
+			session.put( AwsIamServerCertificate.class, Collections.singletonList( TestObjects.serverCertificate() ) );
+
+			var typedQuery =
+					session.createQuery(
+							"select c.* from AwsIAMServerCertificate c", new TypeReference<Map<String, Object>>() {
 							} );
 
 			assertThat( typedQuery.getResultList() ).isNotEmpty();
