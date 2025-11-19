@@ -79,17 +79,4 @@ public class AwsIamRoleDataFetcher implements DataFetcher<AwsIamRole>, Serializa
 	public DataFormat getDataFormat() {
 		return DataFormats.componentMethodConvention( AwsIamRole.class, AwsConventionContext.INSTANCE );
 	}
-
-	private static String resolveResourceId(String arn) {
-		int colonCount = 0;
-		for ( int i = 0; i < arn.length(); i++ ) {
-			if ( arn.charAt( i ) == ':' ) {
-				colonCount++;
-				if ( colonCount == 5 && i + 1 < arn.length() ) {
-					return arn.substring( i + 1 );
-				}
-			}
-		}
-		return arn;
-	}
 }
