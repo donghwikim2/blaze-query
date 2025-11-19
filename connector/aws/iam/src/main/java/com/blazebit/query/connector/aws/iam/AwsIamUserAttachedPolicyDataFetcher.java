@@ -48,9 +48,9 @@ public class AwsIamUserAttachedPolicyDataFetcher implements DataFetcher<AwsIamUs
 				}
 				try (IamClient client = iamClientBuilder.build()) {
 					// Get all users
-					for ( User user : client.listUsers().users() ) {
+					for ( User user : client.listUsersPaginator().users() ) {
 						// For each user, list attached managed policies
-						for ( AttachedPolicy attachedPolicy : client.listAttachedUserPolicies(
+						for ( AttachedPolicy attachedPolicy : client.listAttachedUserPoliciesPaginator(
 								builder -> builder.userName( user.userName() )
 						).attachedPolicies() ) {
 							list.add( AwsIamUserAttachedPolicy.from(
@@ -71,6 +71,6 @@ public class AwsIamUserAttachedPolicyDataFetcher implements DataFetcher<AwsIamUs
 
 	@Override
 	public DataFormat getDataFormat() {
-		return DataFormats.beansConvention( AwsIamUserAttachedPolicy.class, AwsConventionContext.INSTANCE );
+		return DataFormats.componentMethodConvention( AwsIamUserAttachedPolicy.class, AwsConventionContext.INSTANCE );
 	}
 }

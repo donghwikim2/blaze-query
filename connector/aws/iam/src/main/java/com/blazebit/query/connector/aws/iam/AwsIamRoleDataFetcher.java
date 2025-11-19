@@ -47,7 +47,7 @@ public class AwsIamRoleDataFetcher implements DataFetcher<AwsIamRole>, Serializa
 					iamClientBuilder.httpClient( sdkHttpClient );
 				}
 				try (IamClient client = iamClientBuilder.build()) {
-					for ( Role role : client.listRolesPaginator().roles() ) {
+					for ( Role role : client.listRoles().roles() ) {
 						StringTokenizer tokenizer = new StringTokenizer( role.arn(), ":" );
 						// arn
 						tokenizer.nextToken();
@@ -60,10 +60,13 @@ public class AwsIamRoleDataFetcher implements DataFetcher<AwsIamRole>, Serializa
 						// resource id
 						String resourceId = tokenizer.nextToken();
 
+						// Fetch tags for the role
+						var tags = client.listRoleTags( request -> request.roleName( role.roleName() ) ).tags();
+
 						list.add( new AwsIamRole(
 								account.getAccountId(),
 								resourceId,
-								role
+								role.toBuilder().tags( tags ).build()
 						) );
 					}
 				}
@@ -78,18 +81,5 @@ public class AwsIamRoleDataFetcher implements DataFetcher<AwsIamRole>, Serializa
 	@Override
 	public DataFormat getDataFormat() {
 		return DataFormats.componentMethodConvention( AwsIamRole.class, AwsConventionContext.INSTANCE );
-	}
-
-	private static String resolveResourceId(String arn) {
-		int colonCount = 0;
-		for ( int i = 0; i < arn.length(); i++ ) {
-			if ( arn.charAt( i ) == ':' ) {
-				colonCount++;
-				if ( colonCount == 5 && i + 1 < arn.length() ) {
-					return arn.substring( i + 1 );
-				}
-			}
-		}
-		return arn;
 	}
 }

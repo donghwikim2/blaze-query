@@ -71,6 +71,6 @@ public class AwsIamGroupAttachedPolicyDataFetcher implements DataFetcher<AwsIamG
 
 	@Override
 	public DataFormat getDataFormat() {
-		return DataFormats.beansConvention( AwsIamGroupAttachedPolicy.class, AwsConventionContext.INSTANCE );
+		return DataFormats.componentMethodConvention( AwsIamGroupAttachedPolicy.class, AwsConventionContext.INSTANCE );
 	}
 }

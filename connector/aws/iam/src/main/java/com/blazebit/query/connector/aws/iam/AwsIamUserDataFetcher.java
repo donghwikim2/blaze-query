@@ -47,7 +47,7 @@ public class AwsIamUserDataFetcher implements DataFetcher<AwsIamUser>, Serializa
 					iamClientBuilder.httpClient( sdkHttpClient );
 				}
 				try (IamClient client = iamClientBuilder.build()) {
-					for ( User user : client.listUsers().users() ) {
+					for ( User user : client.listUsersPaginator().users() ) {
 						StringTokenizer tokenizer = new StringTokenizer( user.arn(), ":" );
 						// arn
 						tokenizer.nextToken();
@@ -59,10 +59,14 @@ public class AwsIamUserDataFetcher implements DataFetcher<AwsIamUser>, Serializa
 						tokenizer.nextToken();
 						// resource id
 						String resourceId = tokenizer.nextToken();
+
+						// Fetch tags for the user
+						var tags = client.listUserTags( request -> request.userName( user.userName() ) ).tags();
+
 						list.add( new AwsIamUser(
 								account.getAccountId(),
 								resourceId,
-								user
+								user.toBuilder().tags( tags ).build()
 						) );
 					}
 				}

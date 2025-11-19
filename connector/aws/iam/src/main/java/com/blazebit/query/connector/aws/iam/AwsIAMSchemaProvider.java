@@ -34,7 +34,6 @@ public final class AwsIAMSchemaProvider implements QuerySchemaProvider {
 				AwsIamUserInlinePolicyDataFetcher.INSTANCE,
 				AwsIamGroupAttachedPolicyDataFetcher.INSTANCE,
 				AwsIamRoleAttachedPolicyDataFetcher.INSTANCE,
-				AwsIamGroupMembershipDataFetcher.INSTANCE,
 				AwsIamServerCertificateDataFetcher.INSTANCE );
 	}
 }
