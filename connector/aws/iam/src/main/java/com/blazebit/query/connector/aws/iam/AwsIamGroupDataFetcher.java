@@ -14,32 +14,36 @@ import com.blazebit.query.spi.DataFormat;
 import software.amazon.awssdk.http.SdkHttpClient;
 import software.amazon.awssdk.services.iam.IamClient;
 import software.amazon.awssdk.services.iam.IamClientBuilder;
-import software.amazon.awssdk.services.iam.model.Role;
+import software.amazon.awssdk.services.iam.model.Group;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.StringTokenizer;
 
 /**
- * Data fetcher that exposes AWS IAM roles.
+ * Data fetcher for IAM groups.
  *
  * @author Donghwi Kim
  * @since 1.0.0
  */
-public class AwsIamRoleDataFetcher implements DataFetcher<AwsIamRole>, Serializable {
+public class AwsIamGroupDataFetcher implements DataFetcher<AwsIamGroup>, Serializable {
 
-	public static final AwsIamRoleDataFetcher INSTANCE = new AwsIamRoleDataFetcher();
+	public static final AwsIamGroupDataFetcher INSTANCE = new AwsIamGroupDataFetcher();
 
-	private AwsIamRoleDataFetcher() {
+	private AwsIamGroupDataFetcher() {
 	}
 
 	@Override
-	public List<AwsIamRole> fetch(DataFetchContext context) {
+	public DataFormat getDataFormat() {
+		return DataFormats.componentMethodConvention( AwsIamGroup.class, AwsConventionContext.INSTANCE );
+	}
+
+	@Override
+	public List<AwsIamGroup> fetch(DataFetchContext context) {
 		try {
 			List<AwsConnectorConfig.Account> accounts = AwsConnectorConfig.ACCOUNT.getAll( context );
 			SdkHttpClient sdkHttpClient = AwsConnectorConfig.HTTP_CLIENT.find( context );
-			List<AwsIamRole> list = new ArrayList<>();
+			List<AwsIamGroup> list = new ArrayList<>();
 			for ( AwsConnectorConfig.Account account : accounts ) {
 				IamClientBuilder iamClientBuilder = IamClient.builder()
 						// Any region is fine for IAM operations
@@ -49,49 +53,15 @@ public class AwsIamRoleDataFetcher implements DataFetcher<AwsIamRole>, Serializa
 					iamClientBuilder.httpClient( sdkHttpClient );
 				}
 				try (IamClient client = iamClientBuilder.build()) {
-					for ( Role role : client.listRolesPaginator().roles() ) {
-						StringTokenizer tokenizer = new StringTokenizer( role.arn(), ":" );
-						// arn
-						tokenizer.nextToken();
-						// aws
-						tokenizer.nextToken();
-						// iam
-						tokenizer.nextToken();
-						// empty region
-						tokenizer.nextToken();
-						// resource id
-						String resourceId = tokenizer.nextToken();
-
-						list.add( new AwsIamRole(
-								account.getAccountId(),
-								resourceId,
-								role
-						) );
+					for ( Group group : client.listGroupsPaginator().groups() ) {
+						list.add( new AwsIamGroup( account.getAccountId(), group.groupId(), group ) );
 					}
 				}
 			}
 			return list;
 		}
 		catch (RuntimeException e) {
-			throw new DataFetcherException( "Could not fetch role list", e );
+			throw new DataFetcherException( "Could not fetch IAM groups", e );
 		}
-	}
-
-	@Override
-	public DataFormat getDataFormat() {
-		return DataFormats.componentMethodConvention( AwsIamRole.class, AwsConventionContext.INSTANCE );
-	}
-
-	private static String resolveResourceId(String arn) {
-		int colonCount = 0;
-		for ( int i = 0; i < arn.length(); i++ ) {
-			if ( arn.charAt( i ) == ':' ) {
-				colonCount++;
-				if ( colonCount == 5 && i + 1 < arn.length() ) {
-					return arn.substring( i + 1 );
-				}
-			}
-		}
-		return arn;
 	}
 }
