@@ -22,6 +22,7 @@ public class AwsIAMSchemaProviderTest {
 		var builder = new QueryContextBuilderImpl();
 		builder.registerSchemaProvider( new AwsIAMSchemaProvider() );
 		builder.registerSchemaObjectAlias( AwsIamUser.class, "AwsIAMUser" );
+		builder.registerSchemaObjectAlias( AwsIamRole.class, "AwsIAMRole" );
 		builder.registerSchemaObjectAlias( AwsIamPasswordPolicy.class, "AwsIAMPasswordPolicy" );
 		builder.registerSchemaObjectAlias( AwsIamMfaDevice.class, "AwsIAMMFADevice" );
 		builder.registerSchemaObjectAlias( AwsIamAccountSummary.class, "AwsIAMAccountSummary" );
@@ -38,6 +39,20 @@ public class AwsIAMSchemaProviderTest {
 
 			var typedQuery =
 					session.createQuery( "select u.* from AwsIAMUser u", new TypeReference<Map<String, Object>>() {
+					} );
+
+			assertThat( typedQuery.getResultList() ).isNotEmpty();
+		}
+	}
+
+	@Test
+	void should_return_roles() {
+		try (var session = CONTEXT.createSession()) {
+			session.put(
+					AwsIamRole.class, Collections.singletonList( TestObjects.role() ) );
+
+			var typedQuery =
+					session.createQuery( "select r.* from AwsIAMRole r", new TypeReference<Map<String, Object>>() {
 					} );
 
 			assertThat( typedQuery.getResultList() ).isNotEmpty();
