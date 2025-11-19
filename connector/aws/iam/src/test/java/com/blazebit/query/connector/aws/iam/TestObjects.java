@@ -4,6 +4,7 @@
  */
 package com.blazebit.query.connector.aws.iam;
 
+import software.amazon.awssdk.services.iam.model.AttachedPolicy;
 import software.amazon.awssdk.services.iam.model.GetAccountSummaryResponse;
 import software.amazon.awssdk.services.iam.model.MFADevice;
 import software.amazon.awssdk.services.iam.model.PasswordPolicy;
@@ -91,5 +92,18 @@ public final class TestObjects {
 										Map.entry( SummaryKeyType.GROUPS_QUOTA, 5 ) ) )
 						.build();
 		return new AwsIamAccountSummary( "123", test.summaryMap() );
+	}
+
+	public static AwsIamUserAttachedPolicy userAttachedPolicy() {
+		AttachedPolicy attachedPolicy = AttachedPolicy.builder()
+				.policyName( "ReadOnlyAccess" )
+				.policyArn( "arn:aws:iam::aws:policy/ReadOnlyAccess" )
+				.build();
+		return AwsIamUserAttachedPolicy.from( "123", "userWithMFA", attachedPolicy );
+	}
+
+	public static AwsIamUserInlinePolicy userInlinePolicy() {
+		String policyDocument = "{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Action\":\"s3:GetObject\",\"Resource\":\"arn:aws:s3:::example-bucket/*\"}]}";
+		return AwsIamUserInlinePolicy.fromJson( "123", "userWithMFA", "AllowS3Read", policyDocument );
 	}
 }

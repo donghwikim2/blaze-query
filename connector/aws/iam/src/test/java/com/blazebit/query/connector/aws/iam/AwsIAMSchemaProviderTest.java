@@ -25,6 +25,8 @@ public class AwsIAMSchemaProviderTest {
 		builder.registerSchemaObjectAlias( AwsIamPasswordPolicy.class, "AwsIAMPasswordPolicy" );
 		builder.registerSchemaObjectAlias( AwsIamMfaDevice.class, "AwsIAMMFADevice" );
 		builder.registerSchemaObjectAlias( AwsIamAccountSummary.class, "AwsIAMAccountSummary" );
+		builder.registerSchemaObjectAlias( AwsIamUserAttachedPolicy.class, "AwsIAMUserAttachedPolicy" );
+		builder.registerSchemaObjectAlias( AwsIamUserInlinePolicy.class, "AwsIAMUserInlinePolicy" );
 		CONTEXT = builder.build();
 	}
 
@@ -78,6 +80,34 @@ public class AwsIAMSchemaProviderTest {
 			var typedQuery =
 					session.createQuery(
 							"select a.* from AwsIAMAccountSummary a", new TypeReference<Map<String, Object>>() {
+							} );
+
+			assertThat( typedQuery.getResultList() ).isNotEmpty();
+		}
+	}
+
+	@Test
+	void should_return_user_attached_policy() {
+		try (var session = CONTEXT.createSession()) {
+			session.put( AwsIamUserAttachedPolicy.class, Collections.singletonList( TestObjects.userAttachedPolicy() ) );
+
+			var typedQuery =
+					session.createQuery(
+							"select p.* from AwsIAMUserAttachedPolicy p", new TypeReference<Map<String, Object>>() {
+							} );
+
+			assertThat( typedQuery.getResultList() ).isNotEmpty();
+		}
+	}
+
+	@Test
+	void should_return_user_inline_policy() {
+		try (var session = CONTEXT.createSession()) {
+			session.put( AwsIamUserInlinePolicy.class, Collections.singletonList( TestObjects.userInlinePolicy() ) );
+
+			var typedQuery =
+					session.createQuery(
+							"select p.* from AwsIAMUserInlinePolicy p", new TypeReference<Map<String, Object>>() {
 							} );
 
 			assertThat( typedQuery.getResultList() ).isNotEmpty();
