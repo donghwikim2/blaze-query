@@ -10,6 +10,7 @@ import software.amazon.awssdk.services.iam.model.Group;
 import software.amazon.awssdk.services.iam.model.MFADevice;
 import software.amazon.awssdk.services.iam.model.PasswordPolicy;
 import software.amazon.awssdk.services.iam.model.Role;
+import software.amazon.awssdk.services.iam.model.ServerCertificateMetadata;
 import software.amazon.awssdk.services.iam.model.SummaryKeyType;
 import software.amazon.awssdk.services.iam.model.User;
 import software.amazon.awssdk.services.iam.model.VirtualMFADevice;
@@ -174,5 +175,17 @@ public final class TestObjects {
 				.arn( "arn:aws:iam::123456789012:user/userWithMFA" )
 				.build();
 		return AwsIamGroupMembership.from( "123", "SupportTeam", user );
+	}
+
+	public static AwsIamServerCertificate serverCertificate() {
+		ServerCertificateMetadata metadata = ServerCertificateMetadata.builder()
+				.path( "/" )
+				.serverCertificateName( "TestCertificate" )
+				.serverCertificateId( "ASCAJDPLRKL123123" )
+				.arn( "arn:aws:iam::123456789012:server-certificate/TestCertificate" )
+				.uploadDate( Instant.parse( "2024-01-15T12:41:28+00:00" ) )
+				.expiration( Instant.parse( "2025-01-15T12:41:28+00:00" ) )
+				.build();
+		return new AwsIamServerCertificate( "123", metadata.serverCertificateId(), metadata );
 	}
 }
