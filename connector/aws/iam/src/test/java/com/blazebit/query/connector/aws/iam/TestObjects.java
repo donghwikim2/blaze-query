@@ -4,16 +4,11 @@
  */
 package com.blazebit.query.connector.aws.iam;
 
-import software.amazon.awssdk.services.iam.model.AttachedPolicy;
 import software.amazon.awssdk.services.iam.model.GetAccountSummaryResponse;
-import software.amazon.awssdk.services.iam.model.Group;
 import software.amazon.awssdk.services.iam.model.MFADevice;
 import software.amazon.awssdk.services.iam.model.PasswordPolicy;
-import software.amazon.awssdk.services.iam.model.Role;
-import software.amazon.awssdk.services.iam.model.ServerCertificateMetadata;
 import software.amazon.awssdk.services.iam.model.SummaryKeyType;
 import software.amazon.awssdk.services.iam.model.User;
-import software.amazon.awssdk.services.iam.model.VirtualMFADevice;
 
 import java.time.Instant;
 import java.util.Collections;
@@ -35,17 +30,6 @@ public final class TestObjects {
 				.passwordLastUsed( Instant.parse( "2024-07-15T12:41:28+00:00" ) )
 				.build();
 		return new AwsIamUser( "123", user.userId(), user );
-	}
-
-	public static AwsIamRole role() {
-		Role role = Role.builder()
-				.path( "/" )
-				.roleName( "TestRole" )
-				.roleId( "AIDAIRLTEST123123" )
-				.arn( "arn:aws:iam::123456789012:role/TestRole" )
-				.createDate( Instant.parse( "2024-07-15T12:41:28+00:00" ) )
-				.build();
-		return new AwsIamRole( "123", role.roleId(), role );
 	}
 
 	public static AwsIamMfaDevice mfaDevice() {
@@ -107,85 +91,5 @@ public final class TestObjects {
 										Map.entry( SummaryKeyType.GROUPS_QUOTA, 5 ) ) )
 						.build();
 		return new AwsIamAccountSummary( "123", test.summaryMap() );
-	}
-
-	public static AwsIamUserAttachedPolicy userAttachedPolicy() {
-		AttachedPolicy attachedPolicy = AttachedPolicy.builder()
-				.policyName( "ReadOnlyAccess" )
-				.policyArn( "arn:aws:iam::aws:policy/ReadOnlyAccess" )
-				.build();
-		return AwsIamUserAttachedPolicy.from( "123", "userWithMFA", attachedPolicy );
-	}
-
-	public static AwsIamUserInlinePolicy userInlinePolicy() {
-		String policyDocument = "{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Action\":\"s3:GetObject\",\"Resource\":\"arn:aws:s3:::example-bucket/*\"}]}";
-		return AwsIamUserInlinePolicy.fromJson( "123", "userWithMFA", "AllowS3Read", policyDocument );
-	}
-
-	public static AwsIamVirtualMfaDevice virtualMfaDeviceForRoot() {
-		VirtualMFADevice virtualMFADevice = VirtualMFADevice.builder()
-				.serialNumber( "arn:aws:iam::123456789012:mfa/root-account-mfa-device" )
-				.enableDate( Instant.parse( "2024-07-15T12:41:28+00:00" ) )
-				.build();
-		return new AwsIamVirtualMfaDevice( "123", virtualMFADevice.serialNumber(), virtualMFADevice );
-	}
-
-	public static AwsIamVirtualMfaDevice virtualMfaDeviceForUser() {
-		User user = User.builder()
-				.arn( "arn:aws:iam::123456789012:user/userWithMFA" )
-				.build();
-		VirtualMFADevice virtualMFADevice = VirtualMFADevice.builder()
-				.serialNumber( "arn:aws:iam::123456789012:mfa/userWithMFA" )
-				.user( user )
-				.enableDate( Instant.parse( "2024-07-15T12:41:28+00:00" ) )
-				.build();
-		return new AwsIamVirtualMfaDevice( "123", virtualMFADevice.serialNumber(), virtualMFADevice );
-	}
-
-	public static AwsIamGroup group() {
-		Group group = Group.builder()
-				.path( "/" )
-				.groupName( "SupportTeam" )
-				.groupId( "AIDAGROUPTEST123123" )
-				.arn( "arn:aws:iam::123456789012:group/SupportTeam" )
-				.createDate( Instant.parse( "2024-07-15T12:41:28+00:00" ) )
-				.build();
-		return new AwsIamGroup( "123", group.groupId(), group );
-	}
-
-	public static AwsIamGroupAttachedPolicy groupAttachedPolicy() {
-		AttachedPolicy attachedPolicy = AttachedPolicy.builder()
-				.policyName( "AWSSupportAccess" )
-				.policyArn( "arn:aws:iam::aws:policy/AWSSupportAccess" )
-				.build();
-		return AwsIamGroupAttachedPolicy.from( "123", "SupportTeam", attachedPolicy );
-	}
-
-	public static AwsIamRoleAttachedPolicy roleAttachedPolicy() {
-		AttachedPolicy attachedPolicy = AttachedPolicy.builder()
-				.policyName( "AWSSupportAccess" )
-				.policyArn( "arn:aws:iam::aws:policy/AWSSupportAccess" )
-				.build();
-		return AwsIamRoleAttachedPolicy.from( "123", "SupportRole", attachedPolicy );
-	}
-
-	public static AwsIamGroupMembership groupMembership() {
-		User user = User.builder()
-				.userName( "userWithMFA" )
-				.arn( "arn:aws:iam::123456789012:user/userWithMFA" )
-				.build();
-		return AwsIamGroupMembership.from( "123", "SupportTeam", user );
-	}
-
-	public static AwsIamServerCertificate serverCertificate() {
-		ServerCertificateMetadata metadata = ServerCertificateMetadata.builder()
-				.path( "/" )
-				.serverCertificateName( "TestCertificate" )
-				.serverCertificateId( "ASCAJDPLRKL123123" )
-				.arn( "arn:aws:iam::123456789012:server-certificate/TestCertificate" )
-				.uploadDate( Instant.parse( "2024-01-15T12:41:28+00:00" ) )
-				.expiration( Instant.parse( "2025-01-15T12:41:28+00:00" ) )
-				.build();
-		return new AwsIamServerCertificate( "123", metadata.serverCertificateId(), metadata );
 	}
 }
