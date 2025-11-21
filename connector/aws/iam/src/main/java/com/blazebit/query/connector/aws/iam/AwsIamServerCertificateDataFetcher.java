@@ -14,30 +14,34 @@ import com.blazebit.query.spi.DataFormat;
 import software.amazon.awssdk.http.SdkHttpClient;
 import software.amazon.awssdk.services.iam.IamClient;
 import software.amazon.awssdk.services.iam.IamClientBuilder;
-import software.amazon.awssdk.services.iam.model.User;
+import software.amazon.awssdk.services.iam.model.ServerCertificateMetadata;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.StringTokenizer;
 
 /**
- * @author Christian Beikov
+ * @author Donghwi Kim
  * @since 1.0.0
  */
-public class AwsIamUserDataFetcher implements DataFetcher<AwsIamUser>, Serializable {
+public class AwsIamServerCertificateDataFetcher implements DataFetcher<AwsIamServerCertificate>, Serializable {
 
-	public static final AwsIamUserDataFetcher INSTANCE = new AwsIamUserDataFetcher();
+	public static final AwsIamServerCertificateDataFetcher INSTANCE = new AwsIamServerCertificateDataFetcher();
 
-	private AwsIamUserDataFetcher() {
+	private AwsIamServerCertificateDataFetcher() {
 	}
 
 	@Override
-	public List<AwsIamUser> fetch(DataFetchContext context) {
+	public DataFormat getDataFormat() {
+		return DataFormats.componentMethodConvention( AwsIamServerCertificate.class, AwsConventionContext.INSTANCE );
+	}
+
+	@Override
+	public List<AwsIamServerCertificate> fetch(DataFetchContext context) {
 		try {
 			List<AwsConnectorConfig.Account> accounts = AwsConnectorConfig.ACCOUNT.getAll( context );
 			SdkHttpClient sdkHttpClient = AwsConnectorConfig.HTTP_CLIENT.find( context );
-			List<AwsIamUser> list = new ArrayList<>();
+			List<AwsIamServerCertificate> list = new ArrayList<>();
 			for ( AwsConnectorConfig.Account account : accounts ) {
 				IamClientBuilder iamClientBuilder = IamClient.builder()
 						// Any region is fine for IAM operations
@@ -47,22 +51,12 @@ public class AwsIamUserDataFetcher implements DataFetcher<AwsIamUser>, Serializa
 					iamClientBuilder.httpClient( sdkHttpClient );
 				}
 				try (IamClient client = iamClientBuilder.build()) {
-					for ( User user : client.listUsersPaginator().users() ) {
-						StringTokenizer tokenizer = new StringTokenizer( user.arn(), ":" );
-						// arn
-						tokenizer.nextToken();
-						// aws
-						tokenizer.nextToken();
-						// iam
-						tokenizer.nextToken();
-						// empty region
-						tokenizer.nextToken();
-						// resource id
-						String resourceId = tokenizer.nextToken();
-						list.add( new AwsIamUser(
+					for ( ServerCertificateMetadata metadata : client.listServerCertificatesPaginator()
+							.serverCertificateMetadataList() ) {
+						list.add( new AwsIamServerCertificate(
 								account.getAccountId(),
-								resourceId,
-								user
+								metadata.serverCertificateId(),
+								metadata
 						) );
 					}
 				}
@@ -70,12 +64,7 @@ public class AwsIamUserDataFetcher implements DataFetcher<AwsIamUser>, Serializa
 			return list;
 		}
 		catch (RuntimeException e) {
-			throw new DataFetcherException( "Could not fetch user list", e );
+			throw new DataFetcherException( "Could not fetch IAM server certificates", e );
 		}
-	}
-
-	@Override
-	public DataFormat getDataFormat() {
-		return DataFormats.componentMethodConvention( AwsIamUser.class, AwsConventionContext.INSTANCE );
 	}
 }

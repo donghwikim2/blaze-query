@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cat:*)",
+      "Bash(mkdir:*)",
+      "Bash(../../../gradlew classes:*)",
+      "Bash(./gradlew :blaze-query-connector-aws-accessanalyzer:build:*)",
+      "Bash(./gradlew:*)",
+      "Bash(javac:*)",
+      "WebSearch"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
