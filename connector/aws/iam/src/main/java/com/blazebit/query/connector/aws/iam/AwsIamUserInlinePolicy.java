@@ -52,8 +52,13 @@ public record AwsIamUserInlinePolicy(
 		if ( !json.has( "Statement" ) ) {
 			return List.of();
 		}
-		return StreamSupport.stream( json.get( "Statement" ).spliterator(), false )
-				.map( edge -> AwsIamPolicyStatement.fromJson( edge.toString() ) )
-				.collect( Collectors.toList() );
+		JsonNode statementNode = json.get( "Statement" );
+		if ( statementNode.isArray() ) {
+			return StreamSupport.stream( statementNode.spliterator(), false )
+					.map( edge -> AwsIamPolicyStatement.fromJson( edge.toString() ) )
+					.collect( Collectors.toList() );
+		} else {
+			return List.of( AwsIamPolicyStatement.fromJson( statementNode.toString() ) );
+		}
 	}
 }

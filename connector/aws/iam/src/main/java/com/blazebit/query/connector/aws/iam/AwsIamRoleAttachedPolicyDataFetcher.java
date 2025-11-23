@@ -71,6 +71,6 @@ public class AwsIamRoleAttachedPolicyDataFetcher implements DataFetcher<AwsIamRo
 
 	@Override
 	public DataFormat getDataFormat() {
-		return DataFormats.beansConvention( AwsIamRoleAttachedPolicy.class, AwsConventionContext.INSTANCE );
+		return DataFormats.componentMethodConvention( AwsIamRoleAttachedPolicy.class, AwsConventionContext.INSTANCE );
 	}
 }
