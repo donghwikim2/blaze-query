@@ -34,11 +34,6 @@ public class AwsIamGroupDataFetcher implements DataFetcher<AwsIamGroup>, Seriali
 	}
 
 	@Override
-	public DataFormat getDataFormat() {
-		return DataFormats.componentMethodConvention( AwsIamGroup.class, AwsConventionContext.INSTANCE );
-	}
-
-	@Override
 	public List<AwsIamGroup> fetch(DataFetchContext context) {
 		try {
 			List<AwsConnectorConfig.Account> accounts = AwsConnectorConfig.ACCOUNT.getAll( context );
@@ -72,5 +67,10 @@ public class AwsIamGroupDataFetcher implements DataFetcher<AwsIamGroup>, Seriali
 		catch (RuntimeException e) {
 			throw new DataFetcherException( "Could not fetch IAM groups", e );
 		}
+	}
+
+	@Override
+	public DataFormat getDataFormat() {
+		return DataFormats.componentMethodConvention( AwsIamGroup.class, AwsConventionContext.INSTANCE );
 	}
 }

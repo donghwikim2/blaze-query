@@ -32,11 +32,6 @@ public class AwsIamServerCertificateDataFetcher implements DataFetcher<AwsIamSer
 	}
 
 	@Override
-	public DataFormat getDataFormat() {
-		return DataFormats.componentMethodConvention( AwsIamServerCertificate.class, AwsConventionContext.INSTANCE );
-	}
-
-	@Override
 	public List<AwsIamServerCertificate> fetch(DataFetchContext context) {
 		try {
 			List<AwsConnectorConfig.Account> accounts = AwsConnectorConfig.ACCOUNT.getAll( context );
@@ -66,5 +61,10 @@ public class AwsIamServerCertificateDataFetcher implements DataFetcher<AwsIamSer
 		catch (RuntimeException e) {
 			throw new DataFetcherException( "Could not fetch IAM server certificates", e );
 		}
+	}
+
+	@Override
+	public DataFormat getDataFormat() {
+		return DataFormats.componentMethodConvention( AwsIamServerCertificate.class, AwsConventionContext.INSTANCE );
 	}
 }

@@ -33,11 +33,6 @@ public class VirtualMfaDeviceDataFetcher implements DataFetcher<AwsIamVirtualMfa
 	}
 
 	@Override
-	public DataFormat getDataFormat() {
-		return DataFormats.componentMethodConvention( AwsIamVirtualMfaDevice.class, AwsConventionContext.INSTANCE );
-	}
-
-	@Override
 	public List<AwsIamVirtualMfaDevice> fetch(DataFetchContext context) {
 		try {
 			List<AwsConnectorConfig.Account> accounts = AwsConnectorConfig.ACCOUNT.getAll( context );
@@ -68,5 +63,10 @@ public class VirtualMfaDeviceDataFetcher implements DataFetcher<AwsIamVirtualMfa
 		catch (RuntimeException e) {
 			throw new DataFetcherException( "Could not fetch virtual MFA devices list", e );
 		}
+	}
+
+	@Override
+	public DataFormat getDataFormat() {
+		return DataFormats.componentMethodConvention( AwsIamVirtualMfaDevice.class, AwsConventionContext.INSTANCE );
 	}
 }
