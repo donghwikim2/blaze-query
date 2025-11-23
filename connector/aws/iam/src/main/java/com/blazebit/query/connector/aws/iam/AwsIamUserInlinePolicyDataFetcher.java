@@ -48,9 +48,9 @@ public class AwsIamUserInlinePolicyDataFetcher implements DataFetcher<AwsIamUser
 				}
 				try (IamClient client = iamClientBuilder.build()) {
 					// Get all users
-					for ( User user : client.listUsers().users() ) {
+					for ( User user : client.listUsersPaginator().users() ) {
 						// For each user, list inline policy names
-						for ( String policyName : client.listUserPolicies(
+						for ( String policyName : client.listUserPoliciesPaginator(
 								builder -> builder.userName( user.userName() )
 						).policyNames() ) {
 							// Get the actual policy document for each inline policy
