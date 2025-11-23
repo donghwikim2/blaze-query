@@ -34,7 +34,7 @@ public class VirtualMfaDeviceDataFetcher implements DataFetcher<AwsIamVirtualMfa
 
 	@Override
 	public DataFormat getDataFormat() {
-		return DataFormats.beansConvention( AwsIamVirtualMfaDevice.class, AwsConventionContext.INSTANCE );
+		return DataFormats.componentMethodConvention( AwsIamVirtualMfaDevice.class, AwsConventionContext.INSTANCE );
 	}
 
 	@Override
