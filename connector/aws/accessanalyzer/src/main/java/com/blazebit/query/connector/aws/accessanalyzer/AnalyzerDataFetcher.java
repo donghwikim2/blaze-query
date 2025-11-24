@@ -16,7 +16,7 @@ import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.accessanalyzer.AccessAnalyzerClient;
 import software.amazon.awssdk.services.accessanalyzer.AccessAnalyzerClientBuilder;
 import software.amazon.awssdk.services.accessanalyzer.model.AnalyzerSummary;
-import software.amazon.awssdk.utils.builder.SdkBuilder;
+import software.amazon.awssdk.services.accessanalyzer.model.ListAnalyzersRequest;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -49,7 +49,7 @@ public class AnalyzerDataFetcher implements DataFetcher<AwsAnalyzer>, Serializab
 						clientBuilder.httpClient( sdkHttpClient );
 					}
 					try (AccessAnalyzerClient client = clientBuilder.build()) {
-						for ( AnalyzerSummary analyzer : client.listAnalyzersPaginator( SdkBuilder::build ).analyzers() ) {
+						for ( AnalyzerSummary analyzer : client.listAnalyzersPaginator( ListAnalyzersRequest.builder().build() ).analyzers() ) {
 							StringTokenizer tokenizer = new StringTokenizer( analyzer.arn(), ":" );
 							// arn
 							tokenizer.nextToken();

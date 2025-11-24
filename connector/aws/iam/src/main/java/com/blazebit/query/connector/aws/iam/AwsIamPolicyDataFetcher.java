@@ -16,6 +16,7 @@ import software.amazon.awssdk.services.iam.IamClient;
 import software.amazon.awssdk.services.iam.IamClientBuilder;
 import software.amazon.awssdk.services.iam.model.GetPolicyVersionRequest;
 import software.amazon.awssdk.services.iam.model.ListPoliciesRequest;
+import software.amazon.awssdk.services.iam.model.ListPolicyVersionsRequest;
 import software.amazon.awssdk.services.iam.model.Policy;
 import software.amazon.awssdk.services.iam.model.PolicyScopeType;
 
@@ -29,7 +30,7 @@ import java.util.List;
  * @author Donghwi Kim
  * @since 1.0.0
  */
-public class AwsIamPolicyDataFetcher implements DataFetcher<AwsIamPolicy>, Serializable {
+public class AwsIamPolicyDataFetcher implements DataFetcher<AwsIamPolicyVersion>, Serializable {
 
 	public static final AwsIamPolicyDataFetcher INSTANCE = new AwsIamPolicyDataFetcher();
 
@@ -37,11 +38,11 @@ public class AwsIamPolicyDataFetcher implements DataFetcher<AwsIamPolicy>, Seria
 	}
 
 	@Override
-	public List<AwsIamPolicy> fetch(DataFetchContext context) {
+	public List<AwsIamPolicyVersion> fetch(DataFetchContext context) {
 		try {
 			List<AwsConnectorConfig.Account> accounts = AwsConnectorConfig.ACCOUNT.getAll( context );
 			SdkHttpClient sdkHttpClient = AwsConnectorConfig.HTTP_CLIENT.find( context );
-			List<AwsIamPolicy> list = new ArrayList<>();
+			List<AwsIamPolicyVersion> list = new ArrayList<>();
 			for ( AwsConnectorConfig.Account account : accounts ) {
 				IamClientBuilder iamClientBuilder = IamClient.builder()
 						// Any region is fine for IAM operations
@@ -57,26 +58,32 @@ public class AwsIamPolicyDataFetcher implements DataFetcher<AwsIamPolicy>, Seria
 							.build();
 
 					for ( Policy policy : client.listPoliciesPaginator( listPoliciesRequest ).policies() ) {
-						// Get the default version of the policy
-						var getPolicyVersionRequest = GetPolicyVersionRequest.builder()
+						var listPolicyVersionsRequest = ListPolicyVersionsRequest.builder()
 								.policyArn( policy.arn() )
-								.versionId( policy.defaultVersionId() )
 								.build();
 
-						var policyVersion = client.getPolicyVersion( getPolicyVersionRequest );
-						String policyDocument = URLDecoder.decode(
-								policyVersion.policyVersion().document(),
-								StandardCharsets.UTF_8
-						);
+						// Collect every version for the local policy
+						for ( var policyVersionMetadata : client.listPolicyVersionsPaginator( listPolicyVersionsRequest ).versions() ) {
+							var getPolicyVersionRequest = GetPolicyVersionRequest.builder()
+									.policyArn( policy.arn() )
+									.versionId( policyVersionMetadata.versionId() )
+									.build();
 
-						list.add( AwsIamPolicy.fromJson(
-								account.getAccountId(),
-								policy.arn(),
-								policy.policyName(),
-								policy.policyId(),
-								policy.defaultVersionId(),
-								policyDocument
-						) );
+							var policyVersion = client.getPolicyVersion( getPolicyVersionRequest );
+							String policyDocument = URLDecoder.decode(
+									policyVersion.policyVersion().document(),
+									StandardCharsets.UTF_8
+							);
+
+							list.add( AwsIamPolicyVersion.fromJson(
+									account.getAccountId(),
+									policy.arn(),
+									policyVersionMetadata.versionId(),
+									policyVersionMetadata.isDefaultVersion(),
+									policyVersionMetadata.createDate(),
+									policyDocument
+							) );
+						}
 					}
 				}
 			}
@@ -89,6 +96,6 @@ public class AwsIamPolicyDataFetcher implements DataFetcher<AwsIamPolicy>, Seria
 
 	@Override
 	public DataFormat getDataFormat() {
-		return DataFormats.componentMethodConvention( AwsIamPolicy.class, AwsConventionContext.INSTANCE );
+		return DataFormats.componentMethodConvention( AwsIamPolicyVersion.class, AwsConventionContext.INSTANCE );
 	}
 }

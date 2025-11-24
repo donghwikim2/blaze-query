@@ -40,7 +40,7 @@ import com.blazebit.query.connector.aws.iam.AwsIamGroupAttachedPolicy;
 import com.blazebit.query.connector.aws.iam.AwsIamLoginProfile;
 import com.blazebit.query.connector.aws.iam.AwsIamMfaDevice;
 import com.blazebit.query.connector.aws.iam.AwsIamPasswordPolicy;
-import com.blazebit.query.connector.aws.iam.AwsIamPolicy;
+import com.blazebit.query.connector.aws.iam.AwsIamPolicyVersion;
 import com.blazebit.query.connector.aws.iam.AwsIamRole;
 import com.blazebit.query.connector.aws.iam.AwsIamRoleAttachedPolicy;
 import com.blazebit.query.connector.aws.iam.AwsIamServerCertificate;
@@ -266,7 +266,7 @@ public class Main {
 			queryContextBuilder.registerSchemaObjectAlias( AwsIamAccountSummary.class, "AwsIamAccountSummary" );
 			queryContextBuilder.registerSchemaObjectAlias( AwsIamAccessKeyMetaDataLastUsed.class,
 					"AwsAccessKeyMetaDataLastUsed" );
-			queryContextBuilder.registerSchemaObjectAlias( AwsIamPolicy.class, "AwsIamPolicy" );
+			queryContextBuilder.registerSchemaObjectAlias( AwsIamPolicyVersion.class, "AwsIamPolicyVersion" );
 			queryContextBuilder.registerSchemaObjectAlias( AwsIamGroup.class, "AwsGroup" );
 			queryContextBuilder.registerSchemaObjectAlias( AwsIamGroupAttachedPolicy.class, "AwsGroupAttachedPolicy" );
 			queryContextBuilder.registerSchemaObjectAlias( AwsIamRole.class, "AwsRole" );
@@ -457,11 +457,11 @@ public class Main {
 		System.out.println( "AwsAccountSummary" );
 		print( awsAccountSummaryResult );
 
-		TypedQuery<Object[]> awsIamPolicyQuery = session.createQuery(
-				"select p.* from AwsIamPolicy p" );
-		List<Object[]> awsIamPolicyResult = awsIamPolicyQuery.getResultList();
-		System.out.println( "AwsIamPolicies" );
-		print( awsIamPolicyResult );
+		TypedQuery<Object[]> awsIamPolicyVersionQuery = session.createQuery(
+				"select p.* from AwsIamPolicyVersion p" );
+		List<Object[]> awsIamPolicyVersionResult = awsIamPolicyVersionQuery.getResultList();
+		System.out.println( "AwsIamPolicyVersions" );
+		print( awsIamPolicyVersionResult );
 
 		TypedQuery<Object[]> awsGroupQuery = session.createQuery(
 				"select g.* from AwsGroup g" );

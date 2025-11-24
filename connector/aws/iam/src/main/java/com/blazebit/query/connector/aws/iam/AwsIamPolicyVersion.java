@@ -7,6 +7,7 @@ package com.blazebit.query.connector.aws.iam;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -15,38 +16,38 @@ import java.util.stream.StreamSupport;
  * @author Donghwi Kim
  * @since 1.0.0
  */
-public record AwsIamPolicy(
+public record AwsIamPolicyVersion(
 		String accountId,
-		String arn,
-		String policyName,
-		String policyId,
-		String defaultVersionId,
-		String version,
-		List<AwsIamPolicyStatement> statement
+		String policyArn,
+		String versionId,
+		Boolean isDefaultVersion,
+		Instant createDate,
+		String documentVersion,
+		List<AwsIamPolicyStatement> documentStatement
 ) {
 	private static final ObjectMapper MAPPER = ObjectMappers.getInstance();
 
-	public static AwsIamPolicy fromJson(
+	public static AwsIamPolicyVersion fromJson(
 			String accountId,
-			String arn,
-			String policyName,
-			String policyId,
-			String defaultVersionId,
+			String policyArn,
+			String versionId,
+			Boolean isDefaultVersion,
+			Instant createDate,
 			String policyDocument) {
 		try {
 			JsonNode json = MAPPER.readTree( policyDocument );
-			return new AwsIamPolicy(
+			return new AwsIamPolicyVersion(
 					accountId,
-					arn,
-					policyName,
-					policyId,
-					defaultVersionId,
+					policyArn,
+					versionId,
+					isDefaultVersion,
+					createDate,
 					json.has( "Version" ) ? json.get( "Version" ).asText( "" ) : "",
 					parseStatement( json )
 			);
 		}
 		catch (Exception e) {
-			throw new RuntimeException( "Error parsing JSON for AwsIamPolicy", e );
+			throw new RuntimeException( "Error parsing JSON for AwsIamPolicyVersion", e );
 		}
 	}
 
