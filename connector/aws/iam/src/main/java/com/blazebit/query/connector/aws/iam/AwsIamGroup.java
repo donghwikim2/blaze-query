@@ -11,7 +11,6 @@ import software.amazon.awssdk.services.iam.model.GetGroupResponse;
  * @author Donghwi Kim
  * @since 1.0.0
  */
-
 public class AwsIamGroup extends AwsWrapper<GetGroupResponse> {
 	public AwsIamGroup(String accountId, String resourceId, GetGroupResponse payload) {
 		super( accountId, null, resourceId, payload );
