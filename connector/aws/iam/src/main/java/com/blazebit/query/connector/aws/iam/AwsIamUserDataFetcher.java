@@ -59,10 +59,14 @@ public class AwsIamUserDataFetcher implements DataFetcher<AwsIamUser>, Serializa
 						tokenizer.nextToken();
 						// resource id
 						String resourceId = tokenizer.nextToken();
+
+						// Fetch tags for the user
+						var tags = client.listUserTags( request -> request.userName( user.userName() ) ).tags();
+
 						list.add( new AwsIamUser(
 								account.getAccountId(),
 								resourceId,
-								user
+								user.toBuilder().tags( tags ).build()
 						) );
 					}
 				}
