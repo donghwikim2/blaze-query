@@ -47,7 +47,6 @@ public class AwsIamLoginProfileDataFetcher implements DataFetcher<AwsIamLoginPro
 			List<AwsIamLoginProfile> list = new ArrayList<>();
 			for ( AwsConnectorConfig.Account account : accounts ) {
 				IamClientBuilder iamClientBuilder = IamClient.builder()
-						// Any region is fine for IAM operations
 						.region( account.getRegions().iterator().next() )
 						.credentialsProvider( account.getCredentialsProvider() );
 				if ( sdkHttpClient != null ) {

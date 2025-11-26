@@ -39,7 +39,6 @@ public class HostedZoneDataFetcher implements DataFetcher<AwsHostedZone>, Serial
 			List<AwsHostedZone> list = new ArrayList<>();
 			for ( AwsConnectorConfig.Account account : accounts ) {
 				Route53ClientBuilder ec2ClientBuilder = Route53Client.builder()
-						// Any region is fine for IAM operations
 						.region( account.getRegions().iterator().next() )
 						.credentialsProvider( account.getCredentialsProvider() );
 				if ( sdkHttpClient != null ) {
