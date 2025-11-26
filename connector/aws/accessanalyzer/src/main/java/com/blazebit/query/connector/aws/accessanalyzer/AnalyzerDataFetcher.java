@@ -68,8 +68,7 @@ public class AnalyzerDataFetcher implements DataFetcher<AwsAnalyzer>, Serializab
 									account.getAccountId(),
 									region.id(),
 									resourceId,
-									analyzer,
-									analyzer.tags()
+									analyzer
 							) );
 						}
 					}
