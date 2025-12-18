@@ -44,7 +44,7 @@ public class MFADeviceDataFetcher implements DataFetcher<AwsIamMfaDevice>, Seria
 	@Override
 	public List<AwsIamMfaDevice> fetch(DataFetchContext context) {
 		try {
-			List<AwsConnectorConfig.Account> accounts = AwsConnectorConfig.ACCOUNT.getAll( context );
+			List<AwsConnectorConfig.Account> accounts = AwsConnectorConfig.GLOBAL_ACCOUNT.getAll( context );
 			SdkHttpClient sdkHttpClient = AwsConnectorConfig.HTTP_CLIENT.find( context );
 			List<? extends AwsIamUser> users = context.getSession().getOrFetch( AwsIamUser.class );
 			List<AwsIamMfaDevice> list = new ArrayList<>();

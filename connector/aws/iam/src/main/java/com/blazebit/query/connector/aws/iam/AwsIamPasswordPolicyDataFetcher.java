@@ -37,7 +37,7 @@ public class AwsIamPasswordPolicyDataFetcher implements DataFetcher<AwsIamPasswo
 	@Override
 	public List<AwsIamPasswordPolicy> fetch(DataFetchContext context) {
 		try {
-			List<AwsConnectorConfig.Account> accounts = AwsConnectorConfig.ACCOUNT.getAll( context );
+			List<AwsConnectorConfig.Account> accounts = AwsConnectorConfig.GLOBAL_ACCOUNT.getAll( context );
 			SdkHttpClient sdkHttpClient = AwsConnectorConfig.HTTP_CLIENT.find( context );
 			List<AwsIamPasswordPolicy> list = new ArrayList<>();
 			for ( AwsConnectorConfig.Account account : accounts ) {

@@ -35,7 +35,7 @@ public class AwsIamUserAttachedPolicyDataFetcher implements DataFetcher<AwsIamUs
 	@Override
 	public List<AwsIamUserAttachedPolicy> fetch(DataFetchContext context) {
 		try {
-			List<AwsConnectorConfig.Account> accounts = AwsConnectorConfig.ACCOUNT.getAll( context );
+			List<AwsConnectorConfig.Account> accounts = AwsConnectorConfig.GLOBAL_ACCOUNT.getAll( context );
 			SdkHttpClient sdkHttpClient = AwsConnectorConfig.HTTP_CLIENT.find( context );
 			List<AwsIamUserAttachedPolicy> list = new ArrayList<>();
 			for ( AwsConnectorConfig.Account account : accounts ) {

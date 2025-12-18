@@ -36,7 +36,7 @@ public class AwsIamGroupDataFetcher implements DataFetcher<AwsIamGroup>, Seriali
 	@Override
 	public List<AwsIamGroup> fetch(DataFetchContext context) {
 		try {
-			List<AwsConnectorConfig.Account> accounts = AwsConnectorConfig.ACCOUNT.getAll( context );
+			List<AwsConnectorConfig.Account> accounts = AwsConnectorConfig.GLOBAL_ACCOUNT.getAll( context );
 			SdkHttpClient sdkHttpClient = AwsConnectorConfig.HTTP_CLIENT.find( context );
 			List<AwsIamGroup> list = new ArrayList<>();
 			for ( AwsConnectorConfig.Account account : accounts ) {

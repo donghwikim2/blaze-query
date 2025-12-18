@@ -4,11 +4,16 @@
  */
 package com.blazebit.query.connector.aws.base;
 
+import com.blazebit.query.spi.DataFetchContext;
 import com.blazebit.query.spi.DataFetcherConfig;
 import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
 import software.amazon.awssdk.http.SdkHttpClient;
 import software.amazon.awssdk.regions.Region;
 
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -23,6 +28,37 @@ public final class AwsConnectorConfig {
 	 * Specifies the {@link Account} to use for querying data.
 	 */
 	public static final DataFetcherConfig<Account> ACCOUNT = DataFetcherConfig.forPropertyName( "awsAccount" );
+	/**
+	 * Specifies the {@link Account} to use for querying data from global services like IAM and Route53.
+	 * This config automatically deduplicates accounts by account ID, since global services
+	 * return the same data regardless of region.
+	 */
+	public static final DataFetcherConfig<Account> GLOBAL_ACCOUNT = new DataFetcherConfig<>() {
+		@Override
+		public String getPropertyName() {
+			return "awsAccount";
+		}
+
+		@Override
+		public Account find(DataFetchContext context) {
+			return context.findProperty( "awsAccount" );
+		}
+
+		@Override
+		public List<Account> findAll(DataFetchContext context) {
+			List<Account> accounts = ACCOUNT.findAll( context );
+			Map<String, Account> unique = new LinkedHashMap<>();
+			for ( Account account : accounts ) {
+				unique.putIfAbsent( account.getAccountId(), account );
+			}
+			return new ArrayList<>( unique.values() );
+		}
+
+		@Override
+		public String toString() {
+			return "DataFetcherConfig(awsGlobalAccount)";
+		}
+	};
 	/**
 	 * Specifies the {@link SdkHttpClient} to use for querying data.
 	 */

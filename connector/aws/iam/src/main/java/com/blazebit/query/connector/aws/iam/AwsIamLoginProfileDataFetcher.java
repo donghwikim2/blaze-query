@@ -41,7 +41,7 @@ public class AwsIamLoginProfileDataFetcher implements DataFetcher<AwsIamLoginPro
 	@Override
 	public List<AwsIamLoginProfile> fetch(DataFetchContext context) {
 		try {
-			List<AwsConnectorConfig.Account> accounts = AwsConnectorConfig.ACCOUNT.getAll( context );
+			List<AwsConnectorConfig.Account> accounts = AwsConnectorConfig.GLOBAL_ACCOUNT.getAll( context );
 			SdkHttpClient sdkHttpClient = AwsConnectorConfig.HTTP_CLIENT.find( context );
 			List<? extends AwsIamUser> users = context.getSession().getOrFetch( AwsIamUser.class );
 			List<AwsIamLoginProfile> list = new ArrayList<>();

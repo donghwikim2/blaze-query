@@ -35,7 +35,7 @@ public class AwsIamRoleInlinePolicyDataFetcher implements DataFetcher<AwsIamRole
 	@Override
 	public List<AwsIamRoleInlinePolicy> fetch(DataFetchContext context) {
 		try {
-			List<AwsConnectorConfig.Account> accounts = AwsConnectorConfig.ACCOUNT.getAll( context );
+			List<AwsConnectorConfig.Account> accounts = AwsConnectorConfig.GLOBAL_ACCOUNT.getAll( context );
 			SdkHttpClient sdkHttpClient = AwsConnectorConfig.HTTP_CLIENT.find( context );
 			List<AwsIamRoleInlinePolicy> list = new ArrayList<>();
 			for ( AwsConnectorConfig.Account account : accounts ) {
